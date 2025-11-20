@@ -1,0 +1,1184 @@
+/* Reset & Basics */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #FFF8E7;
+  color: #4B3D2A;
+  scroll-behavior: smooth;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: rgba(245, 234, 212, 0.95);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease;
+}
+
+.navbar.scrolled {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4A7C59;
+  cursor: pointer;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.desktop-nav a {
+  text-decoration: none;
+  color: #4B3D2A;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.desktop-nav a:hover {
+  color: #4A7C59;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cart-icon {
+  position: relative;
+  cursor: pointer;
+}
+
+.cart-icon .icon {
+  width: 28px;
+  height: 28px;
+  color: #4A7C59;
+}
+
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #FF7F50;
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+/* Mobile Menu */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.line {
+  height: 2px;
+  background: #4B3D2A;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.line.hide {
+  opacity: 0;
+}
+
+.line.rotate1 {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.line.rotate2 {
+  transform: rotate(-45deg) translate(4px, -4px);
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #F5EAD4;
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  left: 0;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.mobile-nav a {
+  text-decoration: none;
+  color: #4B3D2A;
+  font-weight: 600;
+}
+
+/* Hero */
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+}
+
+/* Animated Background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url("/hero-bg.jpg") center/cover no-repeat;
+  z-index: 0;
+  will-change: transform;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+  padding: 2rem;
+}
+
+.hero h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+}
+
+.hero h2 span {
+  color: #ffcc66;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  color: #fdfdfd;
+  line-height: 1.6;
+}
+
+.hero-btn {
+  margin-top: 2rem;
+  background-color: #e65c00;
+  color: #fff8e7;
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+  background-color: #ff7f50;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: 75vh;
+  }
+
+  .hero h2 {
+    font-size: 2.2rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .hero-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+  }
+}
+
+
+/* Products */
+.products {
+  padding: 4rem 2rem;
+}
+
+.products h3 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 2rem;
+  justify-items: center;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.product-card h4 {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.product-card button {
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.product-card button:hover {
+  opacity: 0.9;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #4B3D2A;
+  font-size: 1.5rem;
+}
+
+.modal-img {
+  width: 100%;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-add {
+  background: #4A7C59;
+  color: #FFF8E7;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-whatsapp {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: #25D366;
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-whatsapp:hover {
+  background: #1ebe5a;
+}
+
+/* Cart */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cart-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cart-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+}
+
+.cart-info h4 {
+  font-weight: 600;
+}
+
+.cart-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.cart-controls button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #4B3D2A;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+
+.cart-controls button:hover {
+  background: #4A7C59;
+  color: #FFF8E7;
+}
+
+/* Floating WhatsApp */
+.floating-whatsapp {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #25D366;
+  padding: 0.75rem;
+  border-radius: 50%;
+  z-index: 1500;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.floating-whatsapp:hover {
+  transform: scale(1.1);
+}
+
+.floating-whatsapp img {
+  width: 28px;
+  height: 28px;
+}
+
+/* Footer */
+footer {
+  background: #FFFDF7;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 4rem;
+  border-top: 1px solid #e7d7b7;
+}
+
+footer a {
+  color: #4B3D2A;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #4A7C59;
+}
+
+/* Responsive */
+@media(max-width: 768px){
+  .desktop-nav { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .hero { flex-direction: column; gap: 1rem; }
+}
+/* About Section */
+.about {
+  padding: 4rem 2rem;
+  background: #FFFDF7;
+  text-align: center;
+  border-top: 1px solid #e7d7b7;
+}
+
+.about h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4A7C59;
+  margin-bottom: 1rem;
+}
+
+.about p {
+  max-width: 700px;
+  margin: 0.5rem auto;
+  line-height: 1.7;
+  color: #4B3D2A;
+}
+
+.contact-info {
+  margin-top: 2rem;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  margin: 0.3rem 0;
+}
+
+.contact-info a {
+  color: #4A7C59;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+.about-page {
+  padding: 4rem 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-page h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #4A7C59;
+}
+
+.about-page p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #444;
+}
+
+.contact-info {
+  margin-top: 2rem;
+}
+
+.contact-info p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.contact-info a {
+  color: #4A7C59;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+/* About Page Styling */
+.about-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #fff8e7;
+  color: #333;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.about h3 {
+  font-size: 2rem;
+  color: #4A7C59;
+  margin-bottom: 1rem;
+}
+
+.about p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  margin: 0.3rem 0;
+}
+
+.contact-info a {
+  color: #FF7F50;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+
+/* Back to Home Button */
+.back-home {
+  margin-top: 30px;
+}
+
+.back-home-btn {
+  display: inline-block;
+  background-color: #4A7C59;
+  color: #FFF8E7;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.back-home-btn:hover {
+  background-color: #3a6146;
+  transform: scale(1.05);
+}
+/* small inputs used in checkout modal */
+.checkout-form input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Reviews (merge with your existing reviews CSS if present) */
+.reviews { padding: 40px 20px; background: transparent; }
+.review-form { max-width: 600px; margin: 0 auto 20px; display:flex; flex-direction:column; gap:8px; }
+.review-form input, .review-form textarea { padding:10px; border-radius:10px; border:1px solid #ddd; font-size:1rem; }
+.submit-review { background:#4A7C59; color:white; padding:10px 14px; border-radius:8px; border:none; cursor:pointer; }
+.review-list { max-width:800px; margin:0 auto; }
+.review-card { background:#fff; padding:12px; border-radius:12px; margin-bottom:10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.review-header { display:flex; justify-content:space-between; align-items:center; }
+.review-rating { color:#FFD700; margin:6px 0; font-size:1.1rem; }
+/* --- Reviews Section --- */
+.reviews {
+  margin-top: 12px;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+.reviews h5 {
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 600;
+}
+
+.reviews p {
+  margin-bottom: 4px;
+  line-height: 1.3;
+  color: #555;
+}
+
+/* Star rating style */
+.reviews p strong {
+  color: #4A7C59; /* Match primary color for chutneys */
+}
+
+/* Review Form */
+.review-form {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.review-form input:focus,
+.review-form select:focus,
+.review-form textarea:focus {
+  border-color: #4A7C59; /* focus color */
+}
+
+.review-form textarea {
+  resize: none;
+  min-height: 50px;
+}
+
+.review-form button {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background-color: #4A7C59;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.review-form button:hover {
+  background-color: #3f6848;
+}
+
+/* Product Card Adjustments */
+.product-card {
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* Scrollable reviews if too many */
+.products-grid .product-card .reviews {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Scrollbar styling */
+.products-grid .product-card .reviews::-webkit-scrollbar {
+  width: 6px;
+}
+.products-grid .product-card .reviews::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+/* Adjust Order Button inside card */
+.product-card button {
+  margin-top: auto;
+  font-weight: 600;
+}
+
+/* =======================
+   About & Footer
+======================= */
+.about {
+  padding: 4rem 2rem;
+  background: #f7f7f7;
+}
+
+.about h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.contact-info p {
+  text-align: center;
+  margin: 0.3rem 0;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  background: #4A7C59;
+  color: #FFF8E7;
+}
+
+/* Coming soon glowing banner */
+.coming-soon-glow {
+  margin: 14px auto;
+  padding: 10px 16px;
+  display: inline-block;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,200,80,0.06), rgba(255,120,50,0.04));
+  box-shadow: 0 0 18px rgba(255,160,50,0.09);
+  font-weight: 700;
+  color: #ff8a00;
+  animation: glow 2.8s ease-in-out infinite;
+  text-align: center;
+}
+
+/* soft pulsating glow */
+@keyframes glow {
+  0% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+  50% { text-shadow: 0 0 18px rgba(255,140,20,0.25); transform: translateY(-3px); }
+  100% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+}
+
+.kg-label { margin-top: -8px; font-size: 0.9rem; color: #777; }
+
+/* pack select area */
+.pack-select {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pack-select select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+}
+.price-display { font-size: 0.95rem; margin-left: 8px; }
+
+/* cart-count bubble style tweak */
+.cart-count {
+  display: inline-block;
+  min-width: 46px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f6f6f6;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* modal img */
+.modal-img { max-width: 180px; margin-bottom: 10px; border-radius: 8px; }
+
+/* small button spacing in cart */
+.cart-controls button { margin-right: 6px; padding: 6px 8px; border-radius: 6px; }
+/* Coming soon glowing banner */
+.coming-soon-glow {
+  margin: 14px auto;
+  padding: 10px 16px;
+  display: inline-block;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,200,80,0.06), rgba(255,120,50,0.04));
+  box-shadow: 0 0 18px rgba(255,160,50,0.09);
+  font-weight: 700;
+  color: #ff8a00;
+  animation: glow 2.8s ease-in-out infinite;
+  text-align: center;
+}
+
+/* soft pulsating glow */
+@keyframes glow {
+  0% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+  50% { text-shadow: 0 0 18px rgba(255,140,20,0.25); transform: translateY(-3px); }
+  100% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+}
+
+.kg-label { margin-top: -8px; font-size: 0.9rem; color: #777; }
+
+/* pack select area */
+.pack-select {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pack-select select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+}
+.price-display { font-size: 0.95rem; margin-left: 8px; }
+
+/* cart-count bubble style tweak */
+.cart-count {
+  display: inline-block;
+  min-width: 46px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f6f6f6;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* modal img */
+.modal-img { max-width: 180px; margin-bottom: 10px; border-radius: 8px; }
+
+/* small button spacing in cart */
+.cart-controls button { margin-right: 6px; padding: 6px 8px; border-radius: 6px; }
+/* Coming soon glowing banner */
+.coming-soon-glow {
+  margin: 14px auto;
+  padding: 10px 16px;
+  display: inline-block;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,200,80,0.06), rgba(255,120,50,0.04));
+  box-shadow: 0 0 18px rgba(255,160,50,0.09);
+  font-weight: 700;
+  color: #ff8a00;
+  animation: glow 2.8s ease-in-out infinite;
+  text-align: center;
+}
+
+/* soft pulsating glow */
+@keyframes glow {
+  0% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+  50% { text-shadow: 0 0 18px rgba(255,140,20,0.25); transform: translateY(-3px); }
+  100% { text-shadow: 0 0 0 rgba(255,140,20,0.0); transform: translateY(0); }
+}
+
+.kg-label { margin-top: -8px; font-size: 0.9rem; color: #777; }
+
+/* pack select area */
+.pack-select {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pack-select select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+}
+.price-display { font-size: 0.95rem; margin-left: 8px; }
+
+/* cart-count bubble style tweak */
+.cart-count {
+  display: inline-block;
+  min-width: 46px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f6f6f6;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* modal img */
+.modal-img { max-width: 180px; margin-bottom: 10px; border-radius: 8px; }
+
+/* small button spacing in cart */
+.cart-controls button { margin-right: 6px; padding: 6px 8px; border-radius: 6px; }
+
+/* Buttons */
+.btn-add {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.btn-whatsapp {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #25D366;
+  color: white;
+}
+/* Pincode box and badge */
+.pincode-box {
+  max-width: 900px;
+  margin: 18px auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pincode-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pincode-row input[type="text"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 220px;
+  font-size: 14px;
+}
+
+/* small glowing badge shown for Pune (411xxx) */
+.glow-badge-small {
+  animation: softPulse 1.8s ease-in-out infinite alternate;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg,#22c55e,#16a34a);
+  box-shadow: 0 4px 18px rgba(34,197,94,0.12);
+  display: inline-block;
+}
+
+/* soft pulse keyframes (Style A) */
+@keyframes softPulse {
+  0% { box-shadow: 0 0 6px rgba(34,197,94,0.06); transform: translateY(0); }
+  60% { box-shadow: 0 0 14px rgba(34,197,94,0.16); transform: translateY(-2px); }
+  100% { box-shadow: 0 0 10px rgba(34,197,94,0.10); transform: translateY(0); }
+}
+
+/* Warning (red) style for pincode message */
+.pincode-warning {
+  color: #b91c1c; /* red */
+  font-weight: 700;
+}
+
+/* small inline delivery message */
+.delivery-info-inline { font-size: 0.95rem; color: #333; margin-left: 6px; }
+.delivery-free { color: #16a34a; font-weight: 700; }
+
+/* Keep previous glow-badge styles (for New Launch) intact */
+.glow-badge {
+  animation: glowPulse 1.6s ease-in-out infinite alternate;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #f3cbcb;
+  background: #22c55e;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 4px #22c55e, 0 0 8px #22c55e; transform: translateY(0); }
+  100% { box-shadow: 0 0 10px #22c55e, 0 0 18px #22c55e; transform: translateY(-2px); }
+}
+/* Pincode box and badge */
+.pincode-box {
+  max-width: 980px;
+  margin: 18px auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.92);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pincode-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.details-grid input[type="text"], .details-grid input[type="tel"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 260px;
+  font-size: 14px;
+}
+
+/* small glowing badge shown for Pune (411xxx) */
+.glow-badge-small {
+  animation: softPulse 1.8s ease-in-out infinite alternate;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg,#22c55e,#16a34a);
+  box-shadow: 0 6px 26px rgba(34,197,94,0.12);
+  display: inline-block;
+}
+
+/* soft pulse keyframes (Style A) */
+@keyframes softPulse {
+  0% { box-shadow: 0 0 6px rgba(34,197,94,0.06); transform: translateY(0); }
+  60% { box-shadow: 0 0 18px rgba(34,197,94,0.16); transform: translateY(-2px); }
+  100% { box-shadow: 0 0 10px rgba(34,197,94,0.10); transform: translateY(0); }
+}
+
+/* Warning (red) style for pincode message */
+.pincode-warning {
+  color: #b91c1c; /* red */
+  font-weight: 700;
+}
+
+/* small inline delivery message */
+.delivery-info-inline { font-size: 0.95rem; color: #333; margin-left: 6px; }
+.delivery-free { color: #16a34a; font-weight: 700; }
+
+/* Payment modal */
+.payment-modal {
+  width: 720px;
+  max-width: 95%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+  position: relative;
+}
+.payment-body {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+.qr-block { flex: 0 0 220px; text-align: center; }
+.upi-qr { width: 200px; height: 200px; object-fit: contain; border-radius: 8px; border: 1px solid #eee; }
+.payment-details { flex: 1; }
+.copy-btn { margin-left: 8px; padding: 6px 8px; border-radius: 6px; border: none; background: #f3f4f6; cursor: pointer; }
+.btn-pay-now { background: #16a34a; color: white; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; }
+.btn-mark-paid { background: #0ea5a4; color: white; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; }
+.btn-back { background: #e5e7eb; color: #111827; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; }
+.small-muted { color: #6b7280; font-size: 0.9rem; }
+
+/* keep existing glow for new launches */
+.glow-badge {
+  animation: glowPulse 1.6s ease-in-out infinite alternate;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #fff;
+  background: #22c55e;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 4px #22c55e, 0 0 8px #22c55e; transform: translateY(0); }
+  100% { box-shadow: 0 0 10px #22c55e, 0 0 18px #22c55e; transform: translateY(-2px); }
+}
+/* Customer details section */
+.customer-details-section {
+  background: #fff8e7;
+  border: 2px solid #f0d28b;
+  padding: 20px;
+  margin: 20px auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  max-width: 800px;
+}
+
+.customer-details-section h3 { margin-bottom: 10px; color: #4A7C59; }
+.customer-details-section p { font-size: 0.95rem; color: #555; margin-bottom: 15px; }
+
+.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.input-group { display: flex; flex-direction: column; }
+.input-group label { font-weight: 600; margin-bottom: 5px; color: #333; }
+.input-group input, .input-group textarea {
+  padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.95rem; transition: border 0.2s;
+}
+.input-group input:focus, .input-group textarea:focus { border-color: #4A7C59; outline: none; }
+textarea { resize: vertical; min-height: 60px; }
+
+.delivery-status { margin-top: 15px; font-weight: 600; font-size: 0.95rem; }
+.badge-free-delivery { color: #fff; background-color: #4A7C59; padding: 5px 10px; border-radius: 20px; }
+.badge-charge { color: #fff; background-color: #FF7F50; padding: 5px 10px; border-radius: 20px; }
+.badge-warning { color: #fff; background-color: #f44336; padding: 5px 10px; border-radius: 20px; }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .details-grid { grid-template-columns: 1fr; }
+  .product-grid { grid-template-columns: 1fr; }
+  .customer-details-section { padding: 15px; margin: 15px; }
+}
+/* App.css */
+.pincode-box {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fdf6e3, #fff8e7);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  border-radius: 20px;
+  border: 1px solid #f0e6d2;
+  font-family: 'Poppins', sans-serif;
+}
+
+.pincode-box label {
+  font-weight: 600;
+  font-size: 1.2rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: #4A4A4A;
+}
+
+.pincode-row input {
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  width: 100%;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s all;
+}
+
+.pincode-row input:focus {
+  border-color: #4A7C59;
+  box-shadow: 0 0 8px rgba(74,124,89,0.3);
+}
+
+.delivery-info-inline {
+  margin-top: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.pincode-warning {
+  color: #D9534F;
+}
+
+.delivery-free {
+  color: #28A745;
+  font-weight: 600;
+}
+
+.pune-badge {
+  margin-top: 1rem;
+}
+
+.glow-badge-small {
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  background-color: #4A7C59;
+  color: white;
+  font-size: 0.9rem;
+  box-shadow: 0 0 10px #4A7C59;
+  display: inline-block;
+}
+
