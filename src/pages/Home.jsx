@@ -51,7 +51,7 @@ export default function App() {
 
   // Load reviews from backend (if available)
   useEffect(() => {
-    fetch("https://indiyummm-backend.onrender.com/api/products/reviews")
+    fetch("https://indiyummm-backend.onrender.com/reviews")
       .then(res => res.json())
       .then(data => setReviews(data || {}))
       .catch(err => console.error("Error loading reviews:", err));
@@ -252,7 +252,7 @@ export default function App() {
       text: form.text
     };
 
-    fetch("https://indiyummm-backend.onrender.com/api/products/reviews", {
+    fetch("https://indiyummm-backend.onrender.com/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newReview)

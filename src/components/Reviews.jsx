@@ -7,7 +7,7 @@ export default function Reviews({ selectedProduct }) {
   // Fetch reviews for selected product
   useEffect(() => {
     if (!selectedProduct) return;
-    fetch("https://indiyummm-backend.onrender.com/api/products/reviews")
+    fetch("https://indiyummm-backend.onrender.com/reviews")
       .then(res => res.json())
       .then(data => setReviews(data[selectedProduct.name] || []))
       .catch(console.error);
@@ -22,7 +22,7 @@ export default function Reviews({ selectedProduct }) {
       ...form
     };
 
-    const res = await fetch("https://indiyummm-backend.onrender.com/api/products/reviews", {
+    const res = await fetch("https://indiyummm-backend.onrender.com/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
