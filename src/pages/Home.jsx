@@ -316,7 +316,7 @@ export default function App() {
 
       {/* ---------------- PINCODE / CUSTOMER DETAILS BOX ---------------- */}
       <div className="pincode-box">
-        <label>Enter customer details to calculate delivery</label>
+        <label>Enter customer details here</label>
         <div className="pincode-row details-grid">
           <input
             type="text"
