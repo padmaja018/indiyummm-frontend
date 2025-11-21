@@ -11,6 +11,8 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [reviews, setReviews] = useState({}); // { productName: [reviews] }
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+
 
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
   const [customerName, setCustomerName] = useState("");
@@ -51,7 +53,7 @@ export default function App() {
 
   // Load reviews from backend (if available)
   useEffect(() => {
-    fetch("https://indiyummm-backend.onrender.com/reviews")
+    fetch("https://indiyummm-backend.onrender.com/api/products/reviews")
       .then(res => res.json())
       .then(data => setReviews(data || {}))
       .catch(err => console.error("Error loading reviews:", err));
@@ -160,21 +162,21 @@ export default function App() {
 
   // ===== WhatsApp auto-fill: full cart order =====
   const handleWhatsAppOrder = () => {
-    if (cart.length === 0) {
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
-      return;
-    }
+  if (cart.length === 0) {
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
+    return;
+  }
 
-    // Block orders until name/address/pincode valid
-    if (!customerName || !customerAddress || deliveryCharge === null || String(pincode).length !== 6) {
-      alert("⚠️ Please fill Name, Address and a valid 6-digit Pincode before placing the order.");
-      return;
-    }
+  // If missing details → OPEN POPUP instead of alert()
+  if (!customerName || !customerAddress || String(pincode).length !== 6) {
+    setDetailsModalOpen(true);
+    return;
+  }
 
-    // open payment modal first (you requested UPI after placing order)
-    setOrderPlaced(true);
-    setPaymentModalOpen(true);
-  };
+  // If details are complete → open payment modal
+  setOrderPlaced(true);
+  setPaymentModalOpen(true);
+};
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
   const confirmPaidAndSendWA = (paid = true) => {
@@ -448,6 +450,68 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Customer Details Modal */}
+<AnimatePresence>
+  {detailsModalOpen && (
+    <motion.div className="modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div className="modal"
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.8 }}
+      >
+        <button className="modal-close" onClick={() => setDetailsModalOpen(false)}>
+          <X />
+        </button>
+
+        <h3>Enter Your Details</h3>
+
+        <input
+          type="text"
+          placeholder="Your Name"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Full Address"
+          value={customerAddress}
+          onChange={(e) => setCustomerAddress(e.target.value)}
+        />
+        <input
+          type="text"
+          maxLength={6}
+          placeholder="Pincode"
+          value={pincode}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+            setPincode(val);
+          }}
+        />
+
+        <button
+          className="btn-whatsapp"
+          style={{ marginTop: 10 }}
+          onClick={() => {
+            if (!customerName || !customerAddress || pincode.length !== 6) {
+              alert("Please enter valid details.");
+              return;
+            }
+            setDetailsModalOpen(false);
+            setOrderPlaced(true);
+            setPaymentModalOpen(true);
+          }}
+        >
+          Continue to Payment
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
       {/* Payment Modal (UPI) - opens after Place Order */}
       <AnimatePresence>
