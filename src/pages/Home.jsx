@@ -114,6 +114,15 @@ export default function App() {
   const subtotal = cart.reduce((sum, item) => sum + (item.calculatedPrice ?? (item.qty * item.pricePerKg)), 0);
   const safeDelivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
   const totalPrice = subtotal + (cart.length > 0 ? safeDelivery : 0);
+
+  // Determine modal amount for payment: if ordering from cart use totalPrice, else if ordering single product use selectedProduct price + delivery
+  const modalAmount = (cart.length > 0)
+    ? totalPrice
+    : (selectedProduct
+        ? (calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (typeof deliveryCharge === "number" ? deliveryCharge : 0))
+        : 0
+      );
+
   const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
 
   // ---------------- Pincode / Delivery logic ----------------
@@ -156,7 +165,7 @@ export default function App() {
     if (deliveryCharge === null) {
       message += `\nDelivery: Pincode / details not entered\nTotal: ${formatRupee(subtotal)} (Delivery pending)\n`;
     } else {
-      message += `\nTotal: ${formatRupee(totalPrice)}`;
+      message += `\nTotal: ${formatRupee(modalAmount)}`;
     }
     return message;
   };
@@ -401,7 +410,7 @@ export default function App() {
                   ))} 
                   <h4>Subtotal: {formatRupee(subtotal)}</h4>
                   <p>Delivery: {deliveryCharge === null ? "—" : formatRupee(deliveryCharge)}</p>
-                  <h4>Total: {deliveryCharge === null ? `${formatRupee(subtotal)} (delivery pending)` : formatRupee(totalPrice)}</h4>
+                  <h4>Total: {deliveryCharge === null ? `${formatRupee(subtotal)} (delivery pending)` : formatRupee(modalAmount)}</h4>
 
                   <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                     <button className="btn-whatsapp w-full" onClick={handleWhatsAppOrder}>Place Order</button>
@@ -527,14 +536,14 @@ export default function App() {
 
                 <div className="payment-details">
                   <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
-                  <p><strong>Amount:</strong> {formatRupee(totalPrice)}</p>
+                  <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
 
                   <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                     <button
                       className="btn-pay-now"
                       onClick={() => {
                         // open UPI intent; many UPI apps will pick this
-                        const amount = (typeof totalPrice === "number") ? totalPrice : 0;
+                        const amount = (typeof modalAmount === "number") ? modalAmount : 0;
                         const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent("Indiyummm")}&am=${encodeURIComponent(amount)}&cu=INR`;
                         window.location.href = upiLink;
                       }}
