@@ -529,7 +529,7 @@ export default function App() {
     {cart.length > 0
       ? totalPrice
       : selectedProduct
-      ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (deliveryCharge or 0)
+      ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (deliveryCharge || 0)
       : 0}
   </h4>
 </div>
