@@ -1243,23 +1243,31 @@ textarea { resize: vertical; min-height: 60px; }
 }
 
 
-/* FIXED NAVBAR AND MOBILE MENU */
+/* FINAL FIXED NAVBAR AND MOBILE MENU */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 99999 !important;
+  z-index: 100000 !important;
+  background: #F7EFD5 !important; /* matches your site color */
 }
 
 .app {
-  padding-top: 80px;
+  padding-top: 90px !important;
 }
 
+/* mobile menu stays below navbar */
 .mobile-nav {
   position: absolute;
   top: 70px;
   left: 0;
   width: 100%;
   z-index: 99998;
+}
+
+/* hero layering fix */
+.hero-bg,
+.hero-overlay {
+  z-index: 1 !important;
 }
