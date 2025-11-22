@@ -41,8 +41,8 @@ export default function App() {
   ];
 
   const pickles = [
-    { name: "Chilli Pickle", price: 180, img: "/chilli-pickle.jpg", desc: "Spicy and tangy green chilli pickle — perfect for those who love heat!", tag: "bestseller" },
-    { name: "Lemon Pickle", price: 170, img: "/lemon-pickle.jpg", desc: "Classic lemon pickle, bursting with citrus flavor and homemade goodness.", tag: "new" },
+    { name: "Chilli Pickle", price: 350, img: "/chilli-pickle.jpg", desc: "Spicy and tangy green chilli pickle — perfect for those who love heat!", tag: "bestseller" },
+    { name: "Lemon Pickle", price: 350, img: "/lemon-pickle.jpg", desc: "Classic lemon pickle, bursting with citrus flavor and homemade goodness.", tag: "new" },
   ];
 
   // ---------------- reviews form state ----------------
