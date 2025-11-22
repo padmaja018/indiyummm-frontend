@@ -493,44 +493,19 @@ export default function App() {
             <motion.div className="modal" initial={{scale:0.8}} animate={{scale:1}} exit={{scale:0.8}} style={{maxHeight:"80vh",overflowY:"auto"}}>
               <button className="modal-close" onClick={()=>setPaymentSummaryOpen(false)}><X/></button>
               <h3>Order Summary</h3>
-              
-<div>
-  {cart.length > 0 ? (
-    cart.map((item, idx) => (
-      <div key={idx} style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
-        <p><strong>{item.name}</strong> ({item.packLabel})</p>
-        <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
-      </div>
-    ))
-  ) : (
-    selectedProduct && (
-      <div style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
-        <p><strong>{selectedProduct.name}</strong> ({selectedProduct.packKg}kg)</p>
-        <p>₹{calcPriceForKg(selectedProduct.price, selectedProduct.packKg)}</p>
-      </div>
-    )
-  )}
-</div>
-<div style={{marginTop:10}}>
-  <p>
-    Subtotal: ₹
-    {cart.length > 0 
-      ? subtotal 
-      : (selectedProduct ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) : 0)
-    }
-  </p>
-  <p>Delivery: ₹{deliveryCharge}</p>
-  <h4>
-    Total: ₹
-    {cart.length > 0
-      ? totalPrice
-      : (selectedProduct 
-          ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (deliveryCharge || 0)
-          : 0)
-    }
-  </h4>
-</div>
-
+              <div>
+                {cart.map((item,idx)=>(
+                  <div key={idx} style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
+                    <p><strong>{item.name}</strong> ({item.packLabel})</p>
+                    <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:10}}>
+                <p>Subtotal: ₹{subtotal}</p>
+                <p>Delivery: ₹{deliveryCharge}</p>
+                <h4>Total: ₹{totalPrice}</h4>
+              </div>
               <div style={{marginTop:10}}>
                 <p><strong>Name:</strong> {customerName}</p>
                 <p><strong>Address:</strong> {customerAddress}</p>
