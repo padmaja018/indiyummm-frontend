@@ -1182,3 +1182,62 @@ textarea { resize: vertical; min-height: 60px; }
   display: inline-block;
 }
 
+/* Mobile improvements for modals and buttons */
+@media (max-width: 600px) {
+  .modal,
+  .payment-modal {
+    width: 96vw !important;
+    max-width: 98vw !important;
+    min-width: unset !important;
+    left: 2vw !important;
+    padding: 1.2rem 0.4rem 1.5rem 0.4rem !important;
+    font-size: 1.05rem;
+    border-radius: 12px;
+  }
+  .modal-backdrop {
+    padding: 0 !important;
+  }
+  .summary-card,
+  .summary-price,
+  .summary-cust {
+    font-size: 1rem !important;
+    padding: 0.6rem !important;
+  }
+  .btn-whatsapp, .btn-pay-now, .btn-mark-paid, .btn-back {
+    font-size: 1.07rem !important;
+    min-width: 120px !important;
+    padding: 0.75rem 0.5rem !important;
+    border-radius: 10px !important;
+  }
+  input, textarea, select {
+    font-size: 1.03rem !important;
+    padding: 0.7rem 0.6rem !important;
+    border-radius: 8px !important;
+  }
+  .product-card {
+    min-width: 0;
+    width: 98vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cart-item {
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-start;
+  }
+}
+
+/* Make modal scrollable if content is long */
+.modal, .payment-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Large tap targets for buttons */
+.btn-whatsapp, .btn-pay-now, .btn-mark-paid, .btn-back {
+  width: 100%;
+  margin: 0.6rem 0;
+  font-size: 1.09rem;
+  padding: 1rem 0.5rem;
+  border-radius: 10px;
+}
