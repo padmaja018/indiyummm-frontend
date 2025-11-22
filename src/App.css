@@ -1241,3 +1241,25 @@ textarea { resize: vertical; min-height: 60px; }
   padding: 1rem 0.5rem;
   border-radius: 10px;
 }
+
+
+/* Mobile nav dropdown */
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  padding: 12px;
+  gap: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-nav a {
+  font-size: 1.1rem;
+  color: #333;
+  text-decoration: none;
+  padding: 6px 0;
+}
+
+.mobile-nav a:hover {
+  color: #25D366;
+}
