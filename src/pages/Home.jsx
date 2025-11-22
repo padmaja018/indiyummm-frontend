@@ -234,7 +234,7 @@ export default function App() {
 
     setSelectedProduct(product);
     setOrderPlaced(true);
-    setPaymentModalOpen(true);
+    setPaymentSummaryOpen(true);
   };
 
   // copy UPI ID helper
@@ -474,7 +474,7 @@ export default function App() {
             }
             setDetailsModalOpen(false);
             setOrderPlaced(true);
-            setPaymentModalOpen(true);
+            setPaymentSummaryOpen(true);
           }}
         >
           Continue to Payment
