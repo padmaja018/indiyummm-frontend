@@ -1243,10 +1243,29 @@ textarea { resize: vertical; min-height: 60px; }
 }
 
 
-/* -------------------
-   FIX: TRUE 2-CARDS-PER-ROW ON MOBILE
-   ------------------- */
+/* --- FIX: PERFECT PREMIUM MOBILE DROPDOWN MENU --- */
 @media (max-width: 768px) {
+  .mobile-nav {
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: #F5EAD4 !important;
+    padding: 18px 0 !important;
+    text-align: center;
+    z-index: 9999 !important;
+    border-bottom: 1px solid #e3d6bd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .mobile-nav a {
+    display: block !important;
+    padding: 12px 0 !important;
+    font-size: 17px !important;
+    color: #4B3D2A !important;
+    font-weight: 600;
+  }
+
   .products-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 1rem !important;
