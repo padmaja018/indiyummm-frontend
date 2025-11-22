@@ -12,6 +12,7 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [reviews, setReviews] = useState({}); // { productName: [reviews] }
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [paymentSummaryOpen, setPaymentSummaryOpen] = useState(false);
 
 
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
@@ -53,7 +54,7 @@ export default function App() {
 
   // Load reviews from backend (if available)
   useEffect(() => {
-    fetch("https://indiyummm-backend.onrender.com/api/products/reviews")
+    fetch("https://indiyummm-backend.onrender.com/reviews")
       .then(res => res.json())
       .then(data => setReviews(data || {}))
       .catch(err => console.error("Error loading reviews:", err));
@@ -175,7 +176,7 @@ export default function App() {
 
   // If details are complete → open payment modal
   setOrderPlaced(true);
-  setPaymentModalOpen(true);
+  setPaymentSummaryOpen(true);
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
@@ -315,55 +316,6 @@ export default function App() {
           <motion.button className="hero-btn" onClick={(e) => handleSmoothScroll(e, "#chutneys")} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Shop Now</motion.button>
         </motion.div>
       </section>
-
-      {/* ---------------- PINCODE / CUSTOMER DETAILS BOX ---------------- */}
-      <div className="pincode-box">
-        <label>Enter customer details here</label>
-        <div className="pincode-row details-grid">
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Full Address (house, street, area)"
-            value={customerAddress}
-            onChange={(e) => setCustomerAddress(e.target.value)}
-          />
-          <input
-            id="pincode"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="Pincode (6 digits)"
-            value={pincode}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "").slice(0,6);
-              setPincode(val);
-            }}
-          />
-
-          {/* Badge appears here only for Pune pincode and only when all details valid */}
-          {customerName && customerAddress && pincode.length === 6 && String(pincode).substring(0,3) === "411" && deliveryCharge === 0 && (
-            <div className="pune-badge">
-              <span className="glow-badge-small">🟢 FREE DELIVERY (PUNE)</span>
-            </div>
-          )}
-
-          {/* Show delivery price dynamically or warning */}
-          <div className="delivery-info-inline">
-            { (!customerName || !customerAddress || pincode.length < 6 || deliveryCharge === null) ? (
-              <span className="pincode-warning">⚠️ Please enter your name, address and pincode</span>
-            ) : deliveryCharge === 0 ? (
-              <span className="delivery-free">Free delivery in Pune</span>
-            ) : (
-              <span>Delivery: <strong>{formatRupee(deliveryCharge)}</strong></span>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Product Sections */}
       <ProductSection
@@ -511,6 +463,41 @@ export default function App() {
     </motion.div>
   )}
 </AnimatePresence>
+
+
+      
+      {/* Payment Summary Modal */}
+      <AnimatePresence>
+        {paymentSummaryOpen && (
+          <motion.div className="modal-backdrop" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <motion.div className="modal" initial={{scale:0.8}} animate={{scale:1}} exit={{scale:0.8}} style={{maxHeight:"80vh",overflowY:"auto"}}>
+              <button className="modal-close" onClick={()=>setPaymentSummaryOpen(false)}><X/></button>
+              <h3>Order Summary</h3>
+              <div>
+                {cart.map((item,idx)=>(
+                  <div key={idx} style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
+                    <p><strong>{item.name}</strong> ({item.packLabel})</p>
+                    <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:10}}>
+                <p>Subtotal: ₹{subtotal}</p>
+                <p>Delivery: ₹{deliveryCharge}</p>
+                <h4>Total: ₹{totalPrice}</h4>
+              </div>
+              <div style={{marginTop:10}}>
+                <p><strong>Name:</strong> {customerName}</p>
+                <p><strong>Address:</strong> {customerAddress}</p>
+                <p><strong>Pincode:</strong> {pincode}</p>
+              </div>
+              <button className="btn-whatsapp" onClick={()=>{setPaymentSummaryOpen(false); setPaymentModalOpen(true);}} style={{marginTop:15}}>
+                Continue to Payment
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       {/* Payment Modal (UPI) - opens after Place Order */}
