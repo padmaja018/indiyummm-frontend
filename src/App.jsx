@@ -27,7 +27,7 @@ export default function App() {
 
         {/* Footer */}
         <footer>
-          <p>© 2025 Indiyummm. All Rights Reserved.</p>
+          <p>© 2025 Indiyummm. All Rights Reserved managed and degined by digital launch25.</p>
         </footer>
       </div>
     </Router>
