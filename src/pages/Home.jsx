@@ -217,11 +217,12 @@ export default function App() {
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
     if (!product) return;
-    if (!customerName || !customerAddress || deliveryCharge === null || String(pincode).length !== 6) {
-      alert("⚠️ Please fill Name, Address and a valid 6-digit Pincode before placing the order.");
+
+    if (!customerName || !customerAddress || String(pincode).length !== 6) {
+      setDetailsModalOpen(true);
       return;
     }
-    // open payment modal for single product
+
     setSelectedProduct(product);
     setOrderPlaced(true);
     setPaymentModalOpen(true);
