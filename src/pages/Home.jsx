@@ -305,6 +305,16 @@ export default function App() {
         </div>
       </header>
 
+{mobileMenuOpen && (
+  <div className="mobile-nav">
+    <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
+    <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
+    <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
+    <a href="#about" onClick={(e)=>handleSmoothScroll(e,'#about')}>About</a>
+  </div>
+)}
+
+
       {/* Hero Section */}
       <section id="home" className="hero">
         <motion.div className="hero-bg" initial={{ scale: 1 }} animate={{ scale: 1.08 }} transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}></motion.div>
