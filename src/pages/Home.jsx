@@ -115,7 +115,7 @@ export default function App() {
   const safeDelivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
   const totalPrice = subtotal + (cart.length > 0 ? safeDelivery : 0);
 
-  // Determine modal amount for payment: if ordering from cart use totalPrice, else if ordering single product use selectedProduct price + delivery
+  // Determine modal amount for payment: cart orders use totalPrice, single-product uses selectedProduct price + delivery (if calculated)
   const modalAmount = (cart.length > 0)
     ? totalPrice
     : (selectedProduct
@@ -226,12 +226,11 @@ export default function App() {
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
     if (!product) return;
-
-    if (!customerName || !customerAddress || String(pincode).length !== 6) {
-      setDetailsModalOpen(true);
+    if (!customerName || !customerAddress || deliveryCharge === null || String(pincode).length !== 6) {
+      alert("⚠️ Please fill Name, Address and a valid 6-digit Pincode before placing the order.");
       return;
     }
-
+    // open payment modal for single product
     setSelectedProduct(product);
     setOrderPlaced(true);
     setPaymentModalOpen(true);
@@ -313,16 +312,6 @@ export default function App() {
           </button>
         </div>
       </header>
-
-{mobileMenuOpen && (
-  <div className="mobile-nav">
-    <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
-    <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
-    <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
-    <a href="#about" onClick={(e)=>handleSmoothScroll(e,'#about')}>About</a>
-  </div>
-)}
-
 
       {/* Hero Section */}
       <section id="home" className="hero">
@@ -493,27 +482,67 @@ export default function App() {
             <motion.div className="modal" initial={{scale:0.8}} animate={{scale:1}} exit={{scale:0.8}} style={{maxHeight:"80vh",overflowY:"auto"}}>
               <button className="modal-close" onClick={()=>setPaymentSummaryOpen(false)}><X/></button>
               <h3>Order Summary</h3>
-              <div>
-                {cart.map((item,idx)=>(
-                  <div key={idx} style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
-                    <p><strong>{item.name}</strong> ({item.packLabel})</p>
-                    <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
+
+              <div style={{marginTop:8}}>
+                {/* If ordering from cart, show list; else show single product breakdown */}
+                {cart.length > 0 ? (
+                  <div>
+                    {cart.map((item,idx)=>(
+                      <div key={idx} style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
+                        <p><strong>{item.name}</strong> ({item.packLabel})</p>
+                        <p>{item.qty} kg — {formatRupee(item.calculatedPrice)}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : selectedProduct ? (
+                  <div style={{borderBottom:"1px solid #ddd",padding:"8px 0"}}>
+                    <p><strong>{selectedProduct.name}</strong></p>
+                    <p>Pack: {selectedProduct.packLabel} ({selectedProduct.packKg} kg)</p>
+                    <p>Product Price: {formatRupee(calcPriceForKg(selectedProduct.price, selectedProduct.packKg))}</p>
+                  </div>
+                ) : (
+                  <p>No items to show.</p>
+                )}
               </div>
+
               <div style={{marginTop:10}}>
-                <p>Subtotal: ₹{subtotal}</p>
-                <p>Delivery: ₹{deliveryCharge}</p>
-                <h4>Total: ₹{totalPrice}</h4>
+                <p>Subtotal: {cart.length > 0 ? formatRupee(subtotal) : (selectedProduct ? formatRupee(calcPriceForKg(selectedProduct.price, selectedProduct.packKg)) : "—")}</p>
+
+                {/* Delivery: if deliveryCharge is null show warning */}
+                {typeof deliveryCharge !== "number" ? (
+                  <p className="pincode-warning">Delivery Charge: ⚠️ Enter Pincode to Calculate</p>
+                ) : (
+                  <p>Delivery Charge: {formatRupee(deliveryCharge)}</p>
+                )}
+
+                <h4>Total: {typeof deliveryCharge !== "number" ? (<span className="pincode-warning">⚠️ Enter Details to Calculate</span>) : (
+                  cart.length > 0 ? formatRupee(modalAmount) : (selectedProduct ? formatRupee(calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + deliveryCharge) : "—")
+                )}</h4>
               </div>
-              <div style={{marginTop:10}}>
-                <p><strong>Name:</strong> {customerName}</p>
-                <p><strong>Address:</strong> {customerAddress}</p>
-                <p><strong>Pincode:</strong> {pincode}</p>
+
+              <div style={{marginTop:12}}>
+                <p><strong>Name:</strong> {customerName || <span className="pincode-warning">Enter Name</span>}</p>
+                <p><strong>Address:</strong> {customerAddress || <span className="pincode-warning">Enter Address</span>}</p>
+                <p><strong>Pincode:</strong> {pincode || <span className="pincode-warning">Enter Pincode</span>}</p>
               </div>
-              <button className="btn-whatsapp" onClick={()=>{setPaymentSummaryOpen(false); setPaymentModalOpen(true);}} style={{marginTop:15}}>
-                Continue to Payment
-              </button>
+
+              <div style={{display:"flex", gap:8, marginTop:15}}>
+                <button className="btn-whatsapp" onClick={() => {
+                  // If deliveryCharge not calculated or missing customer details -> open details modal
+                  if (typeof deliveryCharge !== "number" || !customerName || !customerAddress) {
+                    setPaymentSummaryOpen(false);
+                    setDetailsModalOpen(true);
+                    return;
+                  }
+                  // proceed to payment modal
+                  setPaymentSummaryOpen(false);
+                  setPaymentModalOpen(true);
+                }}>
+                  Continue to Payment
+                </button>
+
+                <button className="btn-add" onClick={() => { setPaymentSummaryOpen(false); setCartOpen(false); }}>Cancel</button>
+              </div>
             </motion.div>
           </motion.div>
         )}
