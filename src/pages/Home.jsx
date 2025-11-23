@@ -572,7 +572,7 @@ export default function App() {
                       onClick={() => {
     const amount = (typeof modalAmount === "number") ? modalAmount : 0;
 
-const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${1}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
 
 window.location.href = gpayLink;
 
