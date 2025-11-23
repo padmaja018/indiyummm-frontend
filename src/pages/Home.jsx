@@ -22,7 +22,7 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(null);
 
   // UPI & payment modal
-  const UPI_ID = "aghogare1@okaxis";
+  const UPI_ID = "ajinkya.kadam1@ybl";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
