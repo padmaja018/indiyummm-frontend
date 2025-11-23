@@ -586,7 +586,7 @@ window.location.href = gpayLink;
   style={{ backgroundColor: "#5A31F4" }}
   onClick={() => {
     const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-    const phonepeLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${1}&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end;`;
+ intent://pay?pa=shivraj27-1@okicici&pn=Indiyummm&cu=INR&am=AMOUNT#Intent;scheme=upi;package=com.phonepe.app;end;
     window.location.href = phonepeLink;
   }}
 >
