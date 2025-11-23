@@ -571,8 +571,11 @@ export default function App() {
                       className="btn-pay-now"
                       onClick={() => {
     const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-    const intentLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;end;`;
-    window.location.href = intentLink;
+
+const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+
+window.location.href = gpayLink;
+
 }}
                     >
                       Pay Now
