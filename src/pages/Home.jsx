@@ -22,7 +22,7 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(null);
 
   // UPI & payment modal
-  const UPI_ID = "shivraj27-1@okicici";
+  const UPI_ID = "aghogare1@okaxis";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
@@ -580,6 +580,18 @@ window.location.href = gpayLink;
                     >
                       Pay Now
                     </button>
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor: "#5A31F4" }}
+  onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+    const phonepeLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.phonepe.app;end;`;
+    window.location.href = phonepeLink;
+  }}
+>
+  Pay with PhonePe
+</button>
+
 
                     <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
                       Mark as Paid
