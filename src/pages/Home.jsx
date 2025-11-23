@@ -566,40 +566,72 @@ export default function App() {
                   <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
                   <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
 
-                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                    <button
-                      className="btn-pay-now"
-                      onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+                  
+<div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
 
-/*const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${1}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;*/
-const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyumm&am=1&cu=INR&tr=${Date.now()}&tn=Order%20Payment&mc=0000#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+  <button
+    className="btn-pay-now"
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const gpay = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+      window.location.href = gpay;
+    }}
+  >
+    Pay with Google Pay
+  </button>
 
-window.location.href = gpayLink;
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#203A81" }}
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const paytm = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end;`;
+      window.location.href = paytm;
+    }}
+  >
+    Pay with Paytm
+  </button>
 
-}}
-                    >
-                      Pay Now
-                    </button>
-<button
-  className="btn-pay-now"
-  style={{ backgroundColor: "#5A31F4" }}
-  onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
- intent://pay?pa=shivraj27-1@okicici&pn=Indiyummm&cu=INR&am=AMOUNT#Intent;scheme=upi;package=com.phonepe.app;end;
-    window.location.href = phonepeLink;
-  }}
->
-  Pay with PhonePe
-</button>
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#008000" }}
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const universal = `upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR`;
+      window.location.href = universal;
+    }}
+  >
+    Pay with ANY UPI App
+  </button>
 
+  {/* Dynamic QR based on amount */}
+  <img
+    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`}
+    alt="QR Code"
+    style={{ marginTop: 10, alignSelf: "center", borderRadius: 10 }}
+  />
 
-                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
-                      Mark as Paid
-                    </button>
+  {/* COD Option */}
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#444" }}
+    onClick={() => {
+      confirmPaidAndSendWA(false);
+    }}
+  >
+    Cash on Delivery (COD)
+  </button>
 
-                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-                  </div>
+  <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
+    Mark as Paid
+  </button>
+
+  <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
+    Go Back
+  </button>
+
+</div>
+
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
