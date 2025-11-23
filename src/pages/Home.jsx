@@ -570,11 +570,10 @@ export default function App() {
                     <button
                       className="btn-pay-now"
                       onClick={() => {
-                        // open UPI intent; many UPI apps will pick this
-                        const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-                        const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent("Indiyummm")}&am=${encodeURIComponent(amount)}&cu=INR`;
-                        window.location.href = upiLink;
-                      }}
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+    const intentLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;end;`;
+    window.location.href = intentLink;
+}}
                     >
                       Pay Now
                     </button>
