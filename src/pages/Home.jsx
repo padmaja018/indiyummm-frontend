@@ -556,11 +556,79 @@ export default function App() {
               <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
               <h3>Complete Payment</h3>
 
-              <div className="payment-body">
-                <div className="qr-block">
-                  {/* Replace /upi-qr.png with your actual QR image in public folder */}
-                  <img src="/upi-qr.png" alt="UPI QR" className="upi-qr" />
-                </div>
+              
+<div className="payment-body">
+
+  {/* QR SCAN & PAY */}
+  <div className="qr-block" style={{ textAlign: "center" }}>
+    <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
+
+    <img 
+      src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} 
+      alt="Dynamic QR" 
+      style={{ width: 230, height: 230, borderRadius: 10 }}
+    />
+  </div>
+
+  {/* PAYMENT DETAILS */}
+  <div className="payment-details">
+    <p><strong>UPI ID:</strong> {UPI_ID} 
+      <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
+    </p>
+
+    <p><strong>Amount:</strong> ₹{modalAmount}</p>
+
+    {/* RAZORPAY BUTTON */}
+    <button
+      className="btn-pay-now"
+      style={{ backgroundColor: "#0F9D58", color: "#fff" }}
+      onClick={() => {
+        const amt = modalAmount * 100;
+        const opt = {
+          key: "rzp_live_RjEUaiYidPpkZD",
+          amount: amt,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: (resp) =>
+            confirmPaidAndSendWA(true, resp.razorpay_payment_id || "")
+        };
+        new window.Razorpay(opt).open();
+      }}
+    >
+      Pay Securely (Razorpay)
+    </button>
+
+    {/* COD */}
+    <button 
+      className="btn-pay-now" 
+      style={{ backgroundColor: "#444", color: "#fff" }}
+      onClick={() => confirmPaidAndSendWA(false)}
+    >
+      Cash on Delivery (COD)
+    </button>
+
+    {/* MARK AS PAID */}
+    <button
+      className="btn-mark-paid"
+      style={{ backgroundColor: "#0A66C2", color: "#fff" }}
+      onClick={() => confirmPaidAndSendWA(true)}
+    >
+      Mark as Paid
+    </button>
+
+    {/* GO BACK */}
+    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
+      Go Back
+    </button>
+
+    <p className="small-muted" style={{ marginTop: 12 }}>
+      After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
+    </p>
+  </div>
+
+</div>
+
 
                 <div className="payment-details">
                   <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
