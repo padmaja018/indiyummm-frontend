@@ -14,6 +14,7 @@ export default function App() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [paymentSummaryOpen, setPaymentSummaryOpen] = useState(false);
 
+
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
   const [customerName, setCustomerName] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
@@ -187,6 +188,7 @@ export default function App() {
   setOrderPlaced(true);
   setPaymentSummaryOpen(true);
 };
+
 const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
   // method: "razorpay" | "cod" | "upi"
   let runningSubtotal = 0;
@@ -245,6 +247,8 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
   setCart([]);
   setOrderPlaced(false);
 };
+
+
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
   
@@ -349,6 +353,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
   </div>
 )}
 
+
       {/* Hero Section */}
       <section id="home" className="hero">
         <motion.div className="hero-bg" initial={{ scale: 1 }} animate={{ scale: 1.08 }} transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}></motion.div>
@@ -389,8 +394,6 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
       />
 
       {/* Product Modal & Cart Modal */}
-      // ...existing code...
-      {/* Product Modal & Cart Modal */}
       <AnimatePresence>
         {selectedProduct && (
           <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -404,6 +407,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
 
               <div className="modal-buttons">
                 <button className="btn-add" onClick={() => { addToCart(selectedProduct, selectedProduct.packKg, selectedProduct.packLabel); setSelectedProduct(null); }}>Add to Cart</button>
+
                 <button className="btn-whatsapp" onClick={() => handleWhatsAppOrderSingle(selectedProduct)}>Place Order</button>
               </div>
             </motion.div>
@@ -416,9 +420,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
               <button className="modal-close" onClick={() => setCartOpen(false)}><X /></button>
               <h3>Your Cart</h3>
 
-              {cart.length === 0 ? (
-                <p>Your cart is empty.</p>
-              ) : (
+              {cart.length === 0 ? <p>Your cart is empty.</p> : (
                 <div className="cart-items">
                   {cart.map((item, idx) => (
                     <div key={`${item.name}-${item.packLabel}-${idx}`} className="cart-item">
@@ -435,8 +437,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
                         </div>
                       </div>
                     </div>
-                  ))}
-
+                  ))} 
                   <h4>Subtotal: {formatRupee(subtotal)}</h4>
                   <p>Delivery: {deliveryCharge === null ? "—" : formatRupee(deliveryCharge)}</p>
                   <h4>Total: {deliveryCharge === null ? `${formatRupee(subtotal)} (delivery pending)` : formatRupee(modalAmount)}</h4>
@@ -451,141 +452,6 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Customer Details Modal */}
-      <AnimatePresence>
-        {detailsModalOpen && (
-          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="modal" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
-              <button className="modal-close" onClick={() => setDetailsModalOpen(false)}><X /></button>
-
-              <h3>Enter Your Details</h3>
-
-              <input type="text" placeholder="Your Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-              <input type="text" placeholder="Full Address" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
-              <input type="text" maxLength={6} placeholder="Pincode" value={pincode} onChange={(e) => { const val = e.target.value.replace(/\D/g, "").slice(0, 6); setPincode(val); }} />
-
-              <button className="btn-whatsapp" style={{ marginTop: 10 }} onClick={() => {
-                if (!customerName || !customerAddress || pincode.length !== 6) { alert("Please enter valid details."); return; }
-                setDetailsModalOpen(false);
-                setOrderPlaced(true);
-                setPaymentSummaryOpen(true);
-              }}>
-                Continue to Payment
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Payment Summary Modal */}
-      <AnimatePresence>
-        {paymentSummaryOpen && (
-          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="modal" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} style={{ maxHeight: "80vh", overflowY: "auto" }}>
-              <button className="modal-close" onClick={() => setPaymentSummaryOpen(false)}><X /></button>
-              <h3>Order Summary</h3>
-
-              <div>
-                {cart.length > 0 ? (
-                  cart.map((item, idx) => (
-                    <div key={idx} style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}>
-                      <p><strong>{item.name}</strong> ({item.packLabel})</p>
-                      <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
-                    </div>
-                  ))
-                ) : (
-                  selectedProduct && (
-                    <div style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}>
-                      <p><strong>{selectedProduct.name}</strong> ({selectedProduct.packLabel})</p>
-                      <p>{selectedProduct.packKg} kg — ₹{calcPriceForKg(selectedProduct.price, selectedProduct.packKg)}</p>
-                    </div>
-                  )
-                )}
-              </div>
-
-              <div style={{ marginTop: 10 }}>
-                <p>Subtotal: ₹{cart.length > 0 ? subtotal : selectedProduct ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) : 0}</p>
-                <p>Delivery: ₹{deliveryCharge === null ? 0 : deliveryCharge}</p>
-                <h4>Total: ₹{cart.length > 0 ? totalPrice : selectedProduct ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (deliveryCharge || 0) : 0}</h4>
-              </div>
-
-              <div style={{ marginTop: 10 }}>
-                <p><strong>Name:</strong> {customerName}</p>
-                <p><strong>Address:</strong> {customerAddress}</p>
-                <p><strong>Pincode:</strong> {pincode}</p>
-              </div>
-
-              <button className="btn-whatsapp" onClick={() => { setPaymentSummaryOpen(false); setPaymentModalOpen(true); }} style={{ marginTop: 15 }}>
-                Continue to Payment
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Payment Modal (single) */}
-      <AnimatePresence>
-        {paymentModalOpen && (
-          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="payment-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
-              <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
-              <h3>Complete Payment</h3>
-
-              <div className="payment-body">
-                <div className="qr-block" style={{ textAlign: "center" }}>
-                  <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
-                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} alt="Dynamic QR" style={{ width: 230, height: 230, borderRadius: 10 }} />
-                </div>
-
-                <div className="payment-details">
-                  <p><strong>UPI ID:</strong> {UPI_ID}
-                    <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
-                  </p>
-
-                  <p><strong>Amount:</strong> ₹{modalAmount}</p>
-
-                  <button className="btn-pay-now" style={{ backgroundColor: "#0F9D58", color: "#fff" }} onClick={() => {
-                    const amt = modalAmount * 100;
-                    const opt = {
-                      key: "rzp_live_RjEUaiYidPpkZD",
-                      amount: amt,
-                      currency: "INR",
-                      name: "Indiyummm",
-                      description: "Order Payment",
-                      handler: (resp) => confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
-                    };
-                    if (typeof window !== "undefined" && window.Razorpay) new window.Razorpay(opt).open();
-                    else alert("Razorpay SDK not found.");
-                  }}>
-                    Pay Securely (Razorpay)
-                  </button>
-
-                  <button className="btn-pay-now" style={{ backgroundColor: "#444", color: "#fff" }} onClick={() => confirmPaidAndSendWA("cod")}>
-                    Cash on Delivery (COD)
-                  </button>
-
-                  <button className="btn-mark-paid" style={{ backgroundColor: "#0A66C2", color: "#fff" }} onClick={() => confirmPaidAndSendWA("upi")}>
-                    Mark as Paid
-                  </button>
-
-                  <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-
-                  <p className="small-muted" style={{ marginTop: 12 }}>
-                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-    </div>
-  );
-}
-
-// ...existing code...
       {/* Customer Details Modal */}
 <AnimatePresence>
   {detailsModalOpen && (
@@ -647,6 +513,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
     </motion.div>
   )}
 </AnimatePresence>
+
 
       
       {/* Payment Summary Modal */}
@@ -710,52 +577,8 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
         )}
       </AnimatePresence>
 
-      {
-{/* Payment Modal (UPI) - cleaned single block */}
-<AnimatePresence>
-  {paymentModalOpen && (
-    <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <motion.div className="payment-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
-        <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
-        <h3>Complete Payment</h3>
-        <div className="payment-body">
-          <div className="qr-block" style={{ textAlign: "center" }}>
-            <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} alt="Dynamic QR" style={{ width: 230, height: 230, borderRadius: 10 }} />
-          </div>
-          <div className="payment-details">
-            <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
-            <p><strong>Amount:</strong> ₹{modalAmount}</p>
-            <button className="btn-pay-now" style={{ backgroundColor: "#0F9D58", color: "#fff" }}
-              onClick={() => {
-                const amt = modalAmount * 100;
-                const options = {
-                  key: "rzp_live_RjEUaiYidPpkZD",
-                  amount: amt,
-                  currency: "INR",
-                  name: "Indiyummm",
-                  description: "Order Payment",
-                  handler: (resp) => confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
-                };
-                new window.Razorpay(options).open();
-              }}>
-              Pay Securely (Razorpay)
-            </button>
-            <button className="btn-pay-now" style={{ backgroundColor: "#444", color: "#fff" }} onClick={() => confirmPaidAndSendWA("cod")}>
-              Cash on Delivery (COD)
-            </button>
-            <button className="btn-mark-paid" style={{ backgroundColor: "#0A66C2", color: "#fff" }} onClick={() => confirmPaidAndSendWA("upi")}>
-              Mark as Paid
-            </button>
-            <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-            <p className="small-muted" style={{ marginTop: 12 }}>After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.</p>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-/* Payment Modal (UPI) - opens after Place Order */}
+
+      {/* Payment Modal (UPI) - opens after Place Order */}
       <AnimatePresence>
         {paymentModalOpen && (
           <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -809,7 +632,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
     <button 
       className="btn-pay-now" 
       style={{ backgroundColor: "#444", color: "#fff" }}
-      onClick={() => confirmPaidAndSendWA("cod")}
+      onClick={() => { setPaymentMethod("cod"); confirmPaidAndSendWA(); }}
     >
       Cash on Delivery (COD)
     </button>
@@ -832,3 +655,131 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
       After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
     </p>
   </div>
+
+                  <p className="small-muted" style={{ marginTop: 12 }}>
+                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
+                  </p>
+                </div>
+              
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating WhatsApp */}
+      <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(getCartMessage())}`} target="_blank" rel="noopener noreferrer" className="floating-whatsapp">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
+      </a>
+
+      {/* About Section */}
+      <section id="about" className="about">
+        <h3>About Indiyummm</h3>
+        <p>Indiyummm brings you the authentic flavors of India — freshly made chutneys, masalas, and pickles crafted from 100% organic, natural ingredients. We believe in purity, tradition, and taste that connects you to home.</p>
+        <div className="contact-info">
+          <p><strong>📞 Contact:</strong> +91 9404955707</p>
+          <p><strong>📧 Email:</strong> indiyumm23@gmail.com</p>
+          <p><strong>📸 Follow us:</strong> <a href="https://instagram.com/indiyummm" target="_blank" rel="noreferrer">@indiyummm</a></p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ----------------- ProductSection Component -----------------
+function ProductSection({ id, title, products, onOrder, addToCart, color, reviews, reviewForm, setReviewForm, submitReview }) {
+  // store selected pack per product: '100g' | '200g' | '500g' | '1kg'
+  const [selectedPack, setSelectedPack] = useState(() => {
+    const init = {};
+    products.forEach(p => init[p.name] = "1kg");
+    return init;
+  });
+
+  const packOptions = [
+    { label: "100g", kg: 0.1 },
+    { label: "200g", kg: 0.2 },
+    { label: "500g", kg: 0.5 },
+    { label: "1kg", kg: 1 }
+  ];
+
+  const getKgFor = (label) => (packOptions.find(o => o.label === label) || packOptions[3]).kg;
+
+  const priceFor = (pricePerKg, kg) => Math.round(pricePerKg * kg);
+
+  return (
+    <section id={id} className="products">
+      <h3 style={{ color }}>{title}</h3>
+
+      {/* Glowing animated "coming soon" banner */}
+      <div className="coming-soon-glow">
+        ✨ More products coming soon! ✨
+      </div>
+
+      <div className="products-grid">
+        {products.map((product, i) => {
+          const form = reviewForm[product.name];
+          const packLabel = selectedPack[product.name] || "1kg";
+          const packKg = getKgFor(packLabel);
+          const displayedPrice = priceFor(product.price, packKg);
+
+          return (
+            <motion.div key={i} className="product-card" whileHover={{ scale: 1.05 }}>
+              {/* NEW LAUNCH glowy badge */}
+              {product.tag === "new" && (
+                <span className="glow-badge badge-new">✨ New Launch</span>
+              )}
+
+              <img src={product.img} alt={product.name} />
+              <h4 style={{ color }}>{product.name}</h4>
+              <p className="kg-label">(Available in packs)</p>
+
+              <div className="pack-select">
+                <label>Choose pack:</label>
+                <select
+                  value={packLabel}
+                  onChange={(e) => setSelectedPack(prev => ({ ...prev, [product.name]: e.target.value }))} 
+                >
+                  {packOptions.map(opt => <option key={opt.label} value={opt.label}>{opt.label}</option>)}
+                </select>
+                <div className="price-display">Price: <strong>{displayedPrice} / {packLabel}</strong></div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                <button
+                  style={{ backgroundColor: color, color: "#FFF8E7" }}
+                  onClick={() => addToCart(product, packKg, packLabel)}
+                >
+                  Add to Cart
+                </button>
+
+                <button
+                  style={{ backgroundColor: "#25D366", color: "white" }}
+                  onClick={() => onOrder(product, packKg, packLabel)}
+                >
+                  Quick View
+                </button>
+              </div>
+
+              {/* Reviews */}
+              <div className="reviews">
+                <h5>Reviews:</h5>
+                {(reviews[product.name] || []).map((r, idx) => (
+                  <p key={idx}><strong>{r.name}</strong> ({r.rating}/5): {r.text}</p>
+                ))}
+
+                {/* Review Form */}
+                <form className="review-form" onSubmit={(e) => { e.preventDefault(); submitReview(product.name); }}>
+                  <input type="text" placeholder="Your Name" value={form.name} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, name: e.target.value } }))} required />
+                  <select value={form.rating} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, rating: parseInt(e.target.value) } }))}>
+                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                  </select>
+                  <textarea placeholder="Your Review" value={form.text} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, text: e.target.value } }))} required />
+                  <button type="submit">Submit Review</button>
+                </form>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
