@@ -190,38 +190,70 @@ export default function App() {
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
   const confirmPaidAndSendWA = (paid = true) => {
-    setOrderPaid(paid);
-    // Build WA message including customer details
-    let message = "🛍️ *Indiyummm Order Details*\n\n";
-    let runningSubtotal = 0;
+
+  // build message
+  let message = "🛍️ *Indiyummm Order Details*";
+  let runningSubtotal = 0;
+
+  if (cart.length > 0) {
     cart.forEach((item, idx) => {
-      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-      message += `Qty: ${item.qty} kg\n`;
-      message += `Price: ${formatRupee(item.calculatedPrice)}\n\n`;
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}
+`;
+      message += `Qty: ${item.qty} kg
+`;
+      message += `Price: ₹${item.calculatedPrice}
+
+`;
       runningSubtotal += item.calculatedPrice;
     });
+  } else if (selectedProduct) {
+    const singlePrice = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
 
-    message += "--------------------\n";
-    message += `Subtotal: ${formatRupee(runningSubtotal)}\n`;
-    message += `Delivery Charges: ${formatRupee(deliveryCharge)}\n`;
-    message += `*Total Payable: ${formatRupee(runningSubtotal + deliveryCharge)}*\n`;
-    message += "--------------------\n\n";
-    message += `Name: ${customerName}\n`;
-    message += `Address: ${customerAddress}\n`;
-    message += `Pincode: ${pincode}\n\n`;
-    message += `Payment: ${paid ? "Paid via UPI" : "Not paid (COD)"}\n\n`;
-    message += "📞 Contact: +91 9404955707\n";
-    message += "📧 Email: indiyumm23@gmail.com\n";
+    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}
+`;
+    message += `Qty: ${selectedProduct.packKg} kg
+`;
+    message += `Price: ₹${singlePrice}
 
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappURL, "_blank");
+`;
 
-    // close payment modal after sending WA
-    setPaymentModalOpen(false);
-    // Optionally clear cart or leave it for reference; here we'll clear cart
-    setCart([]);
-    setOrderPlaced(false);
-  };
+    runningSubtotal = singlePrice;
+  }
+
+  const delivery = deliveryCharge || 0;
+  const totalPayable = runningSubtotal + delivery;
+
+  message += "--------------------";
+  message += `Subtotal: ₹${runningSubtotal}
+`;
+  message += `Delivery Charges: ₹${delivery}
+`;
+  message += `*Total Payable: ₹${totalPayable}*
+`;
+  message += "--------------------";
+
+  message += `Name: ${customerName}
+`;
+  message += `Address: ${customerAddress}
+`;
+  message += `Pincode: ${pincode}
+
+`;
+
+  message += `Payment: ${paid ? "Paid via UPI" : "Cash on Delivery"}
+
+`;
+
+  message += "📞 Contact: +91 9404955707";
+  message += "📧 Email: indiyumm23@gmail.com";
+
+  const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappURL, "_blank");
+
+  setPaymentModalOpen(false);
+  setCart([]);
+  setOrderPlaced(false);
+};
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -626,10 +658,34 @@ export default function App() {
     </p>
   </div>
 
+</div>
 
 
+                <div className="payment-details">
+                  <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
+                  <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
 
-                
+                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                    <button
+                      className="btn-pay-now"
+                      onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+
+const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+
+window.location.href = gpayLink;
+
+}}
+                    >
+                      Pay Now
+                    </button>
+
+                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
+                      Mark as Paid
+                    </button>
+
+                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
+                  </div>
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
