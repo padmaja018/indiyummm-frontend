@@ -567,70 +567,78 @@ export default function App() {
                   <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
 
                   
+
 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
 
-  <button
-    className="btn-pay-now"
-    onClick={() => {
-      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-      const gpay = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
-      window.location.href = gpay;
-    }}
-  >
-    Pay with Google Pay
-  </button>
+{/* WhatsApp Pay (Recommended) */}
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor: "#25D366", color:"#fff", padding:"12px 14px", borderRadius:10, border:"none", fontSize:16 }}
+  onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+    const cartMessage = getCartMessage();
+    const message = `Hello, I want to place an order.
 
-  <button
-    className="btn-pay-now"
-    style={{ backgroundColor: "#203A81" }}
-    onClick={() => {
-      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-      const paytm = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end;`;
-      window.location.href = paytm;
-    }}
-  >
-    Pay with Paytm
-  </button>
+${cartMessage}
 
-  <button
-    className="btn-pay-now"
-    style={{ backgroundColor: "#008000" }}
-    onClick={() => {
-      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-      const universal = `upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR`;
-      window.location.href = universal;
-    }}
-  >
-    Pay with ANY UPI App
-  </button>
+UPI Payment Link:
+upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR
 
-  {/* Dynamic QR based on amount */}
+Amount: ₹${amount}`;
+    window.open(`https://wa.me/9404955707?text=${encodeURIComponent(message)}`, "_blank");
+  }}
+>
+  Pay via WhatsApp (Recommended)
+</button>
+
+{/* Razorpay */}
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor:"#0F9D58", color:"#fff", padding:"12px 14px", borderRadius:10, fontSize:16 }}
+  onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount * 100 : 0;
+    const options = {
+      key: "rzp_live_RjEUaiYidPpkZD",
+      amount: amount,
+      currency: "INR",
+      name: "Indiyummm",
+      description: "Order Payment",
+      handler: function (response) {
+        confirmPaidAndSendWA(true, response.razorpay_payment_id || "");
+      },
+      prefill: { name: customerName || "" },
+      theme: { color: "#0F9D58" }
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  }}
+>
+  Pay Securely (Razorpay)
+</button>
+
+{/* QR */}
+<div style={{ textAlign:"center", marginTop:15 }}>
+  <p style={{ fontSize:14 }}>Or Scan & Pay using ANY UPI App</p>
   <img
     src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`}
-    alt="QR Code"
-    style={{ marginTop: 10, alignSelf: "center", borderRadius: 10 }}
+    alt="QR"
+    style={{ borderRadius:10 }}
   />
+</div>
 
-  {/* COD Option */}
-  <button
-    className="btn-pay-now"
-    style={{ backgroundColor: "#444" }}
-    onClick={() => {
-      confirmPaidAndSendWA(false);
-    }}
-  >
-    Cash on Delivery (COD)
-  </button>
+{/* Cash on Delivery */}
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor:"#444", color:"#fff", padding:"10px 12px", borderRadius:8, fontSize:15, marginTop:10 }}
+  onClick={() => confirmPaidAndSendWA(false)}
+>
+  Cash on Delivery (COD)
+</button>
 
-  <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
-    Mark as Paid
-  </button>
-
-  <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
-    Go Back
-  </button>
+<button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
 
 </div>
+
 
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
