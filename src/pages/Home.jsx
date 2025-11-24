@@ -26,7 +26,6 @@ export default function App() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("");
 
   // Recipient WhatsApp number for orders (international format, no +)
   const whatsappNumber = "919518501138";
@@ -190,76 +189,7 @@ export default function App() {
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  const confirmPaidAndSendWA = () => {
-
-  let paidLabel = "Not Paid";
-  if (paymentMethod === "razorpay") paidLabel = "Paid via Razorpay";
-  else if (paymentMethod === "upi_scan") paidLabel = "Paid via UPI Scan";
-  else if (paymentMethod === "gpay") paidLabel = "Paid via Google Pay";
-  else if (paymentMethod === "cod") paidLabel = "Cash on Delivery Requested";
-
-  let message = "🛍️ *Indiyummm Order Details ";
-  let runningSubtotal = 0;
-
-  if (cart.length > 0) {
-    cart.forEach((item, idx) => {
-      message += `${idx + 1}) *${item.name}* — ${item.packLabel}
-`;
-      message += `Qty: ${item.qty} kg
-`;
-      message += `Price: ₹${item.calculatedPrice}
-
-`;
-      runningSubtotal += item.calculatedPrice;
-    });
-  } else if (selectedProduct) {
-    const singlePrice = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}
-`;
-    message += `Qty: ${selectedProduct.packKg} kg
-`;
-    message += `Price: ₹${singlePrice}
-
-`;
-    runningSubtotal = singlePrice;
-  }
-
-  const delivery = deliveryCharge || 0;
-  const totalPayable = runningSubtotal + delivery;
-
-  message += "----------------------"
-;
-  message += `Subtotal: ₹${runningSubtotal}
-`;
-  message += `Delivery Charges: ₹${delivery}
-`;
-  message += `*Total Payable: ₹${totalPayable}*
-`;
-  message += "-------------------- "
-;
-
-  message += `Name: ${customerName}
-`;
-  message += `Address: ${customerAddress}
-`;
-  message += `Pincode: ${pincode}
-
-`;
-
-  message += `Payment: ${paidLabel}
-
-`;
-
-  message += "📞 Contact: +91 9404955707 ";
-  message += "📧 Email: indiyumm23@gmail.com";
-
-  const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-  window.open(whatsappURL, "_blank");
-
-  setPaymentModalOpen(false);
-  setCart([]);
-  setOrderPlaced(false);
-};
+  
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -640,7 +570,7 @@ export default function App() {
     <button 
       className="btn-pay-now" 
       style={{ backgroundColor: "#444", color: "#fff" }}
-      onClick={() => { setPaymentMethod("cod"); confirmPaidAndSendWA(); }}
+      onClick={() => confirmPaidAndSendWA(false)}
     >
       Cash on Delivery (COD)
     </button>
@@ -664,9 +594,34 @@ export default function App() {
     </p>
   </div>
 
+</div>
 
 
-                
+                <div className="payment-details">
+                  <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
+                  <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
+
+                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                    <button
+                      className="btn-pay-now"
+                      onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+
+const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+
+window.location.href = gpayLink;
+
+}}
+                    >
+                      Pay Now
+                    </button>
+
+                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
+                      Mark as Paid
+                    </button>
+
+                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
+                  </div>
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
