@@ -1,3 +1,16 @@
+
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor: "#25D366", color:"#fff", padding:"12px 14px", borderRadius:10, border:"none", fontSize:16, fontWeight:600 }}
+  onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+    const cartMessage = getCartMessage(); 
+    const message = `Hello, I want to place an order.\n\n${cartMessage}\n\nUPI Payment Link:\nupi://pay?pa=aghogare1@okaxis&pn=Indiyummm&am=${amount}&cu=INR\n\nAmount: ₹${amount}`;
+    window.open(`https://wa.me/9404955707?text=${encodeURIComponent(message)}`, "_blank");
+  }}
+>
+  Pay via WhatsApp (Recommended)
+</button>
 // App.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -189,7 +202,7 @@ export default function App() {
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  const confirmPaidAndSendWA = (paid = true, utr = "") => {
+  const confirmPaidAndSendWA = (paid = true) => {
     setOrderPaid(paid);
     // Build WA message including customer details
     let message = "🛍️ *Indiyummm Order Details*\n\n";
@@ -209,16 +222,7 @@ export default function App() {
     message += `Name: ${customerName}\n`;
     message += `Address: ${customerAddress}\n`;
     message += `Pincode: ${pincode}\n\n`;
-    if (paid) {
-      message += `Payment: Paid via UPI\n`;
-      if (utr && utr.trim() !== "") {
-        message += `Transaction ID / Payment ID: ${utr}\n\n`;
-      } else {
-        message += `Transaction ID / Payment ID: Not provided\n\n`;
-      }
-    } else {
-      message += `Payment: Not paid (COD)\n\n`;
-    }
+    message += `Payment: ${paid ? "Paid via UPI" : "Not paid (COD)"}\n\n`;
     message += "📞 Contact: +91 9404955707\n";
     message += "📧 Email: indiyumm23@gmail.com\n";
 
@@ -581,30 +585,12 @@ export default function App() {
   <button
     className="btn-pay-now"
     onClick={() => {
-      const amount = (typeof modalAmount === "number") ? modalAmount * 100 : 0; // amount in paise
-      const options = {
-        key: "rzp_live_RjEUaiYidPpkZD",
-        amount: amount,
-        currency: "INR",
-        name: "Indiyummm",
-        description: "Order Payment",
-        handler: function (response) {
-          // response.razorpay_payment_id available
-          // mark order paid and include payment id in WA message
-          confirmPaidAndSendWA(true, response.razorpay_payment_id || "");
-        },
-        prefill: {
-          name: customerName || "",
-        },
-        theme: {
-          color: "#00897B"
-        }
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const gpay = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+      window.location.href = gpay;
     }}
   >
-    Pay Now (Razorpay)
+    Pay with Google Pay
   </button>
 
   <button
@@ -787,7 +773,3 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
     </section>
   );
 }
-
-
-/* Razorpay checkout script */
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
