@@ -1,3 +1,16 @@
+
+<button
+  className="btn-pay-now"
+  style={{ backgroundColor: "#25D366", color:"#fff", padding:"12px 14px", borderRadius:10, border:"none", fontSize:16, fontWeight:600 }}
+  onClick={() => {
+    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+    const cartMessage = getCartMessage(); 
+    const message = `Hello, I want to place an order.\n\n${cartMessage}\n\nUPI Payment Link:\nupi://pay?pa=aghogare1@okaxis&pn=Indiyummm&am=${amount}&cu=INR\n\nAmount: ₹${amount}`;
+    window.open(`https://wa.me/9404955707?text=${encodeURIComponent(message)}`, "_blank");
+  }}
+>
+  Pay via WhatsApp (Recommended)
+</button>
 // App.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +35,7 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(null);
 
   // UPI & payment modal
-  const UPI_ID = "aghogare1@okaxis";
+  const UPI_ID = "shivraj27-1@okicici";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
@@ -566,27 +579,72 @@ export default function App() {
                   <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
                   <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
 
-                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                    <button
-                      className="btn-pay-now"
-                      onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+                  
+<div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
 
-const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+  <button
+    className="btn-pay-now"
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const gpay = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+      window.location.href = gpay;
+    }}
+  >
+    Pay with Google Pay
+  </button>
 
-window.location.href = gpayLink;
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#203A81" }}
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const paytm = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=net.one97.paytm;end;`;
+      window.location.href = paytm;
+    }}
+  >
+    Pay with Paytm
+  </button>
 
-}}
-                    >
-                      Pay Now
-                    </button>
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#008000" }}
+    onClick={() => {
+      const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+      const universal = `upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR`;
+      window.location.href = universal;
+    }}
+  >
+    Pay with ANY UPI App
+  </button>
 
-                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
-                      Mark as Paid
-                    </button>
+  {/* Dynamic QR based on amount */}
+  <img
+    src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`}
+    alt="QR Code"
+    style={{ marginTop: 10, alignSelf: "center", borderRadius: 10 }}
+  />
 
-                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-                  </div>
+  {/* COD Option */}
+  <button
+    className="btn-pay-now"
+    style={{ backgroundColor: "#444" }}
+    onClick={() => {
+      confirmPaidAndSendWA(false);
+    }}
+  >
+    Cash on Delivery (COD)
+  </button>
+
+  <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
+    Mark as Paid
+  </button>
+
+  <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
+    Go Back
+  </button>
+
+</div>
+
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
