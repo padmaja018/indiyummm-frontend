@@ -26,6 +26,7 @@ export default function App() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   // Recipient WhatsApp number for orders (international format, no +)
   const whatsappNumber = "919518501138";
@@ -37,7 +38,7 @@ export default function App() {
     { name: "Shegdana Chutney", price: 660, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
     { name: "Javas Chutney", price: 660, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
     { name: "Karala Chutney", price: 660, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
-    { name: "Sesame Chutney", price: 40, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
+    { name: "Sesame Chutney", price: 660, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
   ];
 
   const pickles = [
@@ -187,6 +188,67 @@ export default function App() {
   setOrderPlaced(true);
   setPaymentSummaryOpen(true);
 };
+
+const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
+  // method: "razorpay" | "cod" | "upi"
+  let runningSubtotal = 0;
+  let message = "🛍️ *Indiyummm Order Details*\n\n";
+
+  if (cart && cart.length > 0) {
+    cart.forEach((item, idx) => {
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+      message += `Qty: ${item.qty} kg\n`;
+      message += `Price: ₹${item.calculatedPrice}\n\n`;
+      runningSubtotal += item.calculatedPrice;
+    });
+  } else if (selectedProduct) {
+    const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
+    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
+    message += `Qty: ${selectedProduct.packKg} kg\n`;
+    message += `Price: ₹${priceSingle}\n\n`;
+    runningSubtotal = priceSingle;
+  }
+
+  const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
+  const totalPayable = runningSubtotal + delivery;
+
+  message += "--------------------\n";
+  message += `Subtotal: ₹${runningSubtotal}\n`;
+  message += `Delivery Charges: ₹${delivery}\n`;
+  message += `*Total Payable: ₹${totalPayable}*\n`;
+  message += "--------------------\n\n";
+
+  message += `Name: ${customerName}\n`;
+  message += `Address: ${customerAddress}\n`;
+  message += `Pincode: ${pincode}\n\n`;
+
+  if (method === "razorpay") {
+    message += "Payment: Paid via Razorpay\n\n";
+    if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
+  } else if (method === "cod") {
+    message += "Payment: Cash on Delivery Requested\n\n";
+  } else {
+    message += "Payment: Paid via UPI Scan\n\n";
+  }
+
+  message += "📞 Contact: +91 9404955707\n";
+  message += "📧 Email: indiyumm23@gmail.com\n";
+
+  try {
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, "_blank");
+  } catch (e) {
+    console.error("Failed to open WhatsApp:", e);
+    alert("Unable to open WhatsApp. Please copy the message and send manually.");
+  }
+
+  // Close modal and clear cart after opening WhatsApp
+  setPaymentModalOpen(false);
+  setCart([]);
+  setOrderPlaced(false);
+};
+
+
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
   
@@ -570,7 +632,7 @@ export default function App() {
     <button 
       className="btn-pay-now" 
       style={{ backgroundColor: "#444", color: "#fff" }}
-      onClick={() => confirmPaidAndSendWA("cod")}
+      onClick={() => { setPaymentMethod("cod"); confirmPaidAndSendWA(); }}
     >
       Cash on Delivery (COD)
     </button>
@@ -726,44 +788,3 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
     </section>
   );
 }
-
-
-const confirmPaidAndSendWA = (method, razorpayId = "") => {
-  let runningSubtotal = 0;
-  let message = "🛍️ *Indiyummm Order Details*\n\n";
-
-  if (cart.length > 0) {
-    cart.forEach((item, idx) => {
-      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\nQty: ${item.qty} kg\nPrice: ₹${item.calculatedPrice}\n\n`;
-      runningSubtotal += item.calculatedPrice;
-    });
-  } else if (selectedProduct) {
-    const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\nQty: ${selectedProduct.packKg} kg\nPrice: ₹${priceSingle}\n\n`;
-    runningSubtotal = priceSingle;
-  }
-
-  const delivery = deliveryCharge || 0;
-  const totalPayable = runningSubtotal + delivery;
-
-  message += "--------------------\n";
-  message += `Subtotal: ₹${runningSubtotal}\n`;
-  message += `Delivery Charges: ₹${delivery}\n`;
-  message += `*Total Payable: ₹${totalPayable}*\n`;
-  message += "--------------------\n\n";
-
-  message += `Name: ${customerName}\nAddress: ${customerAddress}\nPincode: ${pincode}\n\n`;
-
-  if (method === "razorpay") message += "Payment: Paid via Razorpay\n";
-  else if (method === "cod") message += "Payment: Cash on Delivery Requested\n";
-  else message += "Payment: Paid via UPI Scan\n";
-
-  if (razorpayId) message += `Razorpay ID: ${razorpayId}\n`;
-
-  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank");
-
-  setPaymentModalOpen(false);
-  setCart([]);
-  setOrderPlaced(false);
-};
