@@ -189,39 +189,7 @@ export default function App() {
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  const confirmPaidAndSendWA = (paid = true) => {
-    setOrderPaid(paid);
-    // Build WA message including customer details
-    let message = "🛍️ *Indiyummm Order Details*\n\n";
-    let runningSubtotal = 0;
-    cart.forEach((item, idx) => {
-      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-      message += `Qty: ${item.qty} kg\n`;
-      message += `Price: ${formatRupee(item.calculatedPrice)}\n\n`;
-      runningSubtotal += item.calculatedPrice;
-    });
-
-    message += "--------------------\n";
-    message += `Subtotal: ${formatRupee(runningSubtotal)}\n`;
-    message += `Delivery Charges: ${formatRupee(deliveryCharge)}\n`;
-    message += `*Total Payable: ${formatRupee(runningSubtotal + deliveryCharge)}*\n`;
-    message += "--------------------\n\n";
-    message += `Name: ${customerName}\n`;
-    message += `Address: ${customerAddress}\n`;
-    message += `Pincode: ${pincode}\n\n`;
-    message += `Payment: ${paid ? "Paid via UPI" : "Not paid (COD)"}\n\n`;
-    message += "📞 Contact: +91 9404955707\n";
-    message += "📧 Email: indiyumm23@gmail.com\n";
-
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappURL, "_blank");
-
-    // close payment modal after sending WA
-    setPaymentModalOpen(false);
-    // Optionally clear cart or leave it for reference; here we'll clear cart
-    setCart([]);
-    setOrderPlaced(false);
-  };
+  
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -758,3 +726,51 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
     </section>
   );
 }
+
+
+const confirmPaidAndSendWA = (paid, razorpayId = "") => {
+  let runningSubtotal = 0;
+  let message = "🛍️ *Indiyummm Order Details*\n\n";
+
+  if (cart.length > 0) {
+    cart.forEach((item, idx) => {
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+      message += `Qty: ${item.qty} kg\n`;
+      message += `Price: ₹${item.calculatedPrice}\n\n`;
+      runningSubtotal += item.calculatedPrice;
+    });
+  } else if (selectedProduct) {
+    const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
+    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
+    message += `Qty: ${selectedProduct.packKg} kg\n`;
+    message += `Price: ₹${priceSingle}\n\n`;
+    runningSubtotal = priceSingle;
+  }
+
+  const delivery = deliveryCharge || 0;
+  const totalPayable = runningSubtotal + delivery;
+
+  message += "--------------------\n";
+  message += `Subtotal: ₹${runningSubtotal}\n`;
+  message += `Delivery Charges: ₹${delivery}\n`;
+  message += `*Total Payable: ₹${totalPayable}*\n`;
+  message += "--------------------\n\n";
+
+  message += `Name: ${customerName}\n`;
+  message += `Address: ${customerAddress}\n`;
+  message += `Pincode: ${pincode}\n\n`;
+
+  if (paid === "razorpay") message += "Payment: Paid via Razorpay\n";
+  else if (paid === "upi") message += "Payment: Paid via UPI Scan\n";
+  else if (paid === "cod") message += "Payment: Cash on Delivery Requested\n";
+  else message += "Payment: Not Paid\n";
+
+  if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
+
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+
+  setPaymentModalOpen(false);
+  setCart([]);
+  setOrderPlaced(false);
+};
