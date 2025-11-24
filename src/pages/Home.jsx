@@ -556,44 +556,79 @@ export default function App() {
               <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
               <h3>Complete Payment</h3>
 
-              <div className="payment-body">
-                <div className="qr-block">
-                  {/* Replace /upi-qr.png with your actual QR image in public folder */}
-                  <img src="/upi-qr.png" alt="UPI QR" className="upi-qr" />
-                </div>
+              
+<div className="payment-body">
+    {/* WhatsApp Pay (Recommended) */}
+    <button
+      className="btn-pay-now"
+      style={{ backgroundColor: "#25D366", color:"#fff", padding:"12px 14px", borderRadius:10, border:"none", fontSize:16 }}
+      onClick={() => {
+        const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+        const cartMessage = getCartMessage();
+        const message = `Hello, I want to place an order.
 
-                <div className="payment-details">
-                  <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
-                  <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
+${cartMessage}
 
-                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                    <button
-                      className="btn-pay-now"
-                      onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
+UPI Payment Link:
+upi://pay?pa=aghogare1@okaxis&pn=Indiyummm&am=${amount}&cu=INR
 
-const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+Amount: ₹${amount}`;
+        window.open(`https://wa.me/919404955707?text=${encodeURIComponent(message)}`, "_blank");
+      }}
+    >
+      Pay via WhatsApp (Recommended)
+    </button>
 
-window.location.href = gpayLink;
+    {/* Razorpay */}
+    <button
+      className="btn-pay-now"
+      style={{ backgroundColor:"#0F9D58", color:"#fff", padding:"12px 14px", borderRadius:10, fontSize:16 }}
+      onClick={() => {
+        const amount = (typeof modalAmount === "number") ? modalAmount * 100 : 0;
+        const options = {
+          key: "rzp_live_RjEUaiYidPpkZD",
+          amount: amount,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: function (response) {
+            confirmPaidAndSendWA(true, response.razorpay_payment_id || "");
+          },
+          prefill: { name: customerName || "" },
+          theme: { color: "#0F9D58" }
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }}
+    >
+      Pay Securely (Razorpay)
+    </button>
 
-}}
-                    >
-                      Pay Now
-                    </button>
+    {/* QR */}
+    <div style={{ textAlign:"center", marginTop:15 }}>
+      <p style={{ fontSize:14 }}>Or Scan & Pay using UPI</p>
+      <img
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=aghogare1@okaxis&pn=Indiyummm&am=${modalAmount}&cu=INR`}
+        alt="QR"
+        style={{ borderRadius:10 }}
+      />
+    </div>
 
-                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
-                      Mark as Paid
-                    </button>
+    {/* COD */}
+    <button
+      className="btn-pay-now"
+      style={{ backgroundColor:"#444", color:"#fff", padding:"10px 12px", borderRadius:8, fontSize:15, marginTop:10 }}
+      onClick={() => confirmPaidAndSendWA(false)}
+    >
+      Cash on Delivery (COD)
+    </button>
 
-                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-                  </div>
+    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
 
-                  <p className="small-muted" style={{ marginTop: 12 }}>
-                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
-                  </p>
-                </div>
+</div>
               </div>
             </motion.div>
+
           </motion.div>
         )}
       </AnimatePresence>
