@@ -1,16 +1,3 @@
-
-<button
-  className="btn-pay-now"
-  style={{ backgroundColor: "#25D366", color:"#fff", padding:"12px 14px", borderRadius:10, border:"none", fontSize:16, fontWeight:600 }}
-  onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-    const cartMessage = getCartMessage(); 
-    const message = `Hello, I want to place an order.\n\n${cartMessage}\n\nUPI Payment Link:\nupi://pay?pa=aghogare1@okaxis&pn=Indiyummm&am=${amount}&cu=INR\n\nAmount: ₹${amount}`;
-    window.open(`https://wa.me/9404955707?text=${encodeURIComponent(message)}`, "_blank");
-  }}
->
-  Pay via WhatsApp (Recommended)
-</button>
 // App.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +22,7 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(null);
 
   // UPI & payment modal
-  const UPI_ID = "shivraj27-1@okicici";
+  const UPI_ID = "aghogare1@okaxis";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
