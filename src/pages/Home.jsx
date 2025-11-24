@@ -389,6 +389,8 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
       />
 
       {/* Product Modal & Cart Modal */}
+      // ...existing code...
+      {/* Product Modal & Cart Modal */}
       <AnimatePresence>
         {selectedProduct && (
           <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -402,7 +404,6 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
 
               <div className="modal-buttons">
                 <button className="btn-add" onClick={() => { addToCart(selectedProduct, selectedProduct.packKg, selectedProduct.packLabel); setSelectedProduct(null); }}>Add to Cart</button>
-
                 <button className="btn-whatsapp" onClick={() => handleWhatsAppOrderSingle(selectedProduct)}>Place Order</button>
               </div>
             </motion.div>
@@ -415,7 +416,9 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
               <button className="modal-close" onClick={() => setCartOpen(false)}><X /></button>
               <h3>Your Cart</h3>
 
-              {cart.length === 0 ? <p>Your cart is empty.</p> : (
+              {cart.length === 0 ? (
+                <p>Your cart is empty.</p>
+              ) : (
                 <div className="cart-items">
                   {cart.map((item, idx) => (
                     <div key={`${item.name}-${item.packLabel}-${idx}`} className="cart-item">
@@ -430,7 +433,10 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
                           <button onClick={() => updateQty(item, roundKg(item.qty + 0.1))}>+</button>
                           <button onClick={() => removeFromCart(item)}>Remove</button>
                         </div>
-))} 
+                      </div>
+                    </div>
+                  ))}
+
                   <h4>Subtotal: {formatRupee(subtotal)}</h4>
                   <p>Delivery: {deliveryCharge === null ? "—" : formatRupee(deliveryCharge)}</p>
                   <h4>Total: {deliveryCharge === null ? `${formatRupee(subtotal)} (delivery pending)` : formatRupee(modalAmount)}</h4>
@@ -439,11 +445,147 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
                     <button className="btn-whatsapp w-full" onClick={handleWhatsAppOrder}>Place Order</button>
                     <button className="btn-add" onClick={() => { setCart([]); setCartOpen(false); }}>Clear</button>
                   </div>
-)}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Customer Details Modal */}
+      <AnimatePresence>
+        {detailsModalOpen && (
+          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="modal" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
+              <button className="modal-close" onClick={() => setDetailsModalOpen(false)}><X /></button>
+
+              <h3>Enter Your Details</h3>
+
+              <input type="text" placeholder="Your Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+              <input type="text" placeholder="Full Address" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
+              <input type="text" maxLength={6} placeholder="Pincode" value={pincode} onChange={(e) => { const val = e.target.value.replace(/\D/g, "").slice(0, 6); setPincode(val); }} />
+
+              <button className="btn-whatsapp" style={{ marginTop: 10 }} onClick={() => {
+                if (!customerName || !customerAddress || pincode.length !== 6) { alert("Please enter valid details."); return; }
+                setDetailsModalOpen(false);
+                setOrderPlaced(true);
+                setPaymentSummaryOpen(true);
+              }}>
+                Continue to Payment
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Payment Summary Modal */}
+      <AnimatePresence>
+        {paymentSummaryOpen && (
+          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="modal" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} style={{ maxHeight: "80vh", overflowY: "auto" }}>
+              <button className="modal-close" onClick={() => setPaymentSummaryOpen(false)}><X /></button>
+              <h3>Order Summary</h3>
+
+              <div>
+                {cart.length > 0 ? (
+                  cart.map((item, idx) => (
+                    <div key={idx} style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}>
+                      <p><strong>{item.name}</strong> ({item.packLabel})</p>
+                      <p>{item.qty} kg — ₹{item.calculatedPrice}</p>
+                    </div>
+                  ))
+                ) : (
+                  selectedProduct && (
+                    <div style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}>
+                      <p><strong>{selectedProduct.name}</strong> ({selectedProduct.packLabel})</p>
+                      <p>{selectedProduct.packKg} kg — ₹{calcPriceForKg(selectedProduct.price, selectedProduct.packKg)}</p>
+                    </div>
+                  )
+                )}
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <p>Subtotal: ₹{cart.length > 0 ? subtotal : selectedProduct ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) : 0}</p>
+                <p>Delivery: ₹{deliveryCharge === null ? 0 : deliveryCharge}</p>
+                <h4>Total: ₹{cart.length > 0 ? totalPrice : selectedProduct ? calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (deliveryCharge || 0) : 0}</h4>
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <p><strong>Name:</strong> {customerName}</p>
+                <p><strong>Address:</strong> {customerAddress}</p>
+                <p><strong>Pincode:</strong> {pincode}</p>
+              </div>
+
+              <button className="btn-whatsapp" onClick={() => { setPaymentSummaryOpen(false); setPaymentModalOpen(true); }} style={{ marginTop: 15 }}>
+                Continue to Payment
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Payment Modal (single) */}
+      <AnimatePresence>
+        {paymentModalOpen && (
+          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="payment-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
+              <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
+              <h3>Complete Payment</h3>
+
+              <div className="payment-body">
+                <div className="qr-block" style={{ textAlign: "center" }}>
+                  <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} alt="Dynamic QR" style={{ width: 230, height: 230, borderRadius: 10 }} />
+                </div>
+
+                <div className="payment-details">
+                  <p><strong>UPI ID:</strong> {UPI_ID}
+                    <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
+                  </p>
+
+                  <p><strong>Amount:</strong> ₹{modalAmount}</p>
+
+                  <button className="btn-pay-now" style={{ backgroundColor: "#0F9D58", color: "#fff" }} onClick={() => {
+                    const amt = modalAmount * 100;
+                    const opt = {
+                      key: "rzp_live_RjEUaiYidPpkZD",
+                      amount: amt,
+                      currency: "INR",
+                      name: "Indiyummm",
+                      description: "Order Payment",
+                      handler: (resp) => confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
+                    };
+                    if (typeof window !== "undefined" && window.Razorpay) new window.Razorpay(opt).open();
+                    else alert("Razorpay SDK not found.");
+                  }}>
+                    Pay Securely (Razorpay)
+                  </button>
+
+                  <button className="btn-pay-now" style={{ backgroundColor: "#444", color: "#fff" }} onClick={() => confirmPaidAndSendWA("cod")}>
+                    Cash on Delivery (COD)
+                  </button>
+
+                  <button className="btn-mark-paid" style={{ backgroundColor: "#0A66C2", color: "#fff" }} onClick={() => confirmPaidAndSendWA("upi")}>
+                    Mark as Paid
+                  </button>
+
+                  <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
+
+                  <p className="small-muted" style={{ marginTop: 12 }}>
+                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
+
+// ...existing code...
       {/* Customer Details Modal */}
 <AnimatePresence>
   {detailsModalOpen && (
@@ -576,35 +718,18 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
       <motion.div className="payment-modal" initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}>
         <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
         <h3>Complete Payment</h3>
-
         <div className="payment-body">
-
-          {/* QR SCAN & PAY */}
           <div className="qr-block" style={{ textAlign: "center" }}>
             <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
-            <img 
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} 
-              alt="Dynamic QR" 
-              style={{ width: 230, height: 230, borderRadius: 10 }}
-            />
+            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} alt="Dynamic QR" style={{ width: 230, height: 230, borderRadius: 10 }} />
           </div>
-
-          {/* PAYMENT DETAILS */}
           <div className="payment-details">
-            <p><strong>UPI ID:</strong> {UPI_ID} 
-              <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
-            </p>
-
+            <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
             <p><strong>Amount:</strong> ₹{modalAmount}</p>
-
-            {/* RAZORPAY BUTTON */}
-            <button
-              className="btn-pay-now"
-              style={{ backgroundColor: "#0F9D58", color: "#fff" }}
+            <button className="btn-pay-now" style={{ backgroundColor: "#0F9D58", color: "#fff" }}
               onClick={() => {
-                setPaymentMethod("razorpay");
                 const amt = modalAmount * 100;
-                const opt = {
+                const options = {
                   key: "rzp_live_RjEUaiYidPpkZD",
                   amount: amt,
                   currency: "INR",
@@ -612,43 +737,20 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
                   description: "Order Payment",
                   handler: (resp) => confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
                 };
-                if (window && window.Razorpay) new window.Razorpay(opt).open();
-                else alert("Razorpay SDK not found.");
-              }}
-            >
+                new window.Razorpay(options).open();
+              }}>
               Pay Securely (Razorpay)
             </button>
-
-            {/* COD */}
-            <button 
-              className="btn-pay-now" 
-              style={{ backgroundColor: "#444", color: "#fff" }}
-              onClick={() => { setPaymentMethod("cod"); confirmPaidAndSendWA("cod"); }}
-            >
+            <button className="btn-pay-now" style={{ backgroundColor: "#444", color: "#fff" }} onClick={() => confirmPaidAndSendWA("cod")}>
               Cash on Delivery (COD)
             </button>
-
-            {/* MARK AS PAID - UPI Scan */}
-            <button
-              className="btn-mark-paid"
-              style={{ backgroundColor: "#0A66C2", color: "#fff" }}
-              onClick={() => { setPaymentMethod("upi"); confirmPaidAndSendWA("upi"); }}
-            >
+            <button className="btn-mark-paid" style={{ backgroundColor: "#0A66C2", color: "#fff" }} onClick={() => confirmPaidAndSendWA("upi")}>
               Mark as Paid
             </button>
-
-            {/* GO BACK */}
-            <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
-              Go Back
-            </button>
-
-            <p className="small-muted" style={{ marginTop: 12 }}>
-              After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
-            </p>
+            <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
+            <p className="small-muted" style={{ marginTop: 12 }}>After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.</p>
           </div>
-
         </div>
-
       </motion.div>
     </motion.div>
   )}
