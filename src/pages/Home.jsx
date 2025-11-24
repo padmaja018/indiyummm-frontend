@@ -625,7 +625,7 @@ Amount: ₹${amount}`;
 
     <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
 
-</div>
+
               </div>
             </motion.div>
 
