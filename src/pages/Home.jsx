@@ -198,8 +198,9 @@ export default function App() {
   else if (paymentMethod === "gpay") paidLabel = "Paid via Google Pay";
   else if (paymentMethod === "cod") paidLabel = "Cash on Delivery";
 
-  let message = "🛍️ *Indiyummm Order Details*          ";
-  
+  let message = "🛍️ *Indiyummm Order Details*
+
+";
   let runningSubtotal = 0;
 
   if (cart.length > 0) {
@@ -228,15 +229,17 @@ export default function App() {
   const delivery = deliveryCharge || 0;
   const totalPayable = runningSubtotal + delivery;
 
-  message += "--------------------";
-
+  message += "--------------------
+";
   message += `Subtotal: ₹${runningSubtotal}
 `;
   message += `Delivery Charges: ₹${delivery}
 `;
   message += `*Total Payable: ₹${totalPayable}*
 `;
-  message += "--------------------";
+  message += "--------------------
+
+";
 
   message += `Name: ${customerName}
 `;
@@ -250,8 +253,10 @@ export default function App() {
 
 `;
 
-  message += "📞 Contact: +91 9404955707";
-  message += "📧 Email: indiyumm23@gmail.com";
+  message += "📞 Contact: +91 9404955707
+";
+  message += "📧 Email: indiyumm23@gmail.com
+";
 
   const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   window.open(whatsappURL, "_blank");
