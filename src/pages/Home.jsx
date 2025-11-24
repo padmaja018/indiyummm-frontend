@@ -667,31 +667,7 @@ export default function App() {
 </div>
 
 
-                <div className="payment-details">
-                  <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
-                  <p><strong>Amount:</strong> {formatRupee(modalAmount)}</p>
-
-                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                    <button
-                      className="btn-pay-now"
-                      onClick={() => {
-    const amount = (typeof modalAmount === "number") ? modalAmount : 0;
-
-const gpayLink = `intent://pay?pa=${UPI_ID}&pn=Indiyummm&am=${amount}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
-
-window.location.href = gpayLink;
-
-}}
-                    >
-                      Pay Now
-                    </button>
-
-                    <button className="btn-mark-paid" onClick={() => confirmPaidAndSendWA(true)}>
-                      Mark as Paid
-                    </button>
-
-                    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>Go Back</button>
-                  </div>
+                
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
