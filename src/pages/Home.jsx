@@ -26,6 +26,7 @@ export default function App() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   // Recipient WhatsApp number for orders (international format, no +)
   const whatsappNumber = "919518501138";
@@ -189,10 +190,16 @@ export default function App() {
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  const confirmPaidAndSendWA = (paid = true) => {
+  const confirmPaidAndSendWA = () => {
 
-  // build message
-  let message = "🛍️ *Indiyummm Order Details*";
+  let paidLabel = "Not Paid";
+  if (paymentMethod === "razorpay") paidLabel = "Paid via Razorpay";
+  else if (paymentMethod === "upi_scan") paidLabel = "Paid via UPI Scan";
+  else if (paymentMethod === "gpay") paidLabel = "Paid via Google Pay";
+  else if (paymentMethod === "cod") paidLabel = "Cash on Delivery";
+
+  let message = "🛍️ *Indiyummm Order Details*          ";
+  
   let runningSubtotal = 0;
 
   if (cart.length > 0) {
@@ -208,7 +215,6 @@ export default function App() {
     });
   } else if (selectedProduct) {
     const singlePrice = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-
     message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}
 `;
     message += `Qty: ${selectedProduct.packKg} kg
@@ -216,7 +222,6 @@ export default function App() {
     message += `Price: ₹${singlePrice}
 
 `;
-
     runningSubtotal = singlePrice;
   }
 
@@ -224,6 +229,7 @@ export default function App() {
   const totalPayable = runningSubtotal + delivery;
 
   message += "--------------------";
+
   message += `Subtotal: ₹${runningSubtotal}
 `;
   message += `Delivery Charges: ₹${delivery}
@@ -240,7 +246,7 @@ export default function App() {
 
 `;
 
-  message += `Payment: ${paid ? "Paid via UPI" : "Cash on Delivery"}
+  message += `Payment: ${paidLabel}
 
 `;
 
