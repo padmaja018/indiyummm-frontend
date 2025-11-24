@@ -189,43 +189,39 @@ export default function App() {
 };
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  
-const confirmPaidAndSendWA = (paid = false, paymentId = "") => {
-  let message = "🛍️ *Indiyummm Order Details*\n\n";
-  let subtotal = 0;
+  const confirmPaidAndSendWA = (paid = true) => {
+    setOrderPaid(paid);
+    // Build WA message including customer details
+    let message = "🛍️ *Indiyummm Order Details*\n\n";
+    let runningSubtotal = 0;
+    cart.forEach((item, idx) => {
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+      message += `Qty: ${item.qty} kg\n`;
+      message += `Price: ${formatRupee(item.calculatedPrice)}\n\n`;
+      runningSubtotal += item.calculatedPrice;
+    });
 
-  cart.forEach((item, index) => {
-    message += `${index + 1}) *${item.name}* (${item.packLabel})\n`;
-    message += `Qty: ${item.qty}\n`;
-    message += `Price: ₹${item.calculatedPrice}\n\n`;
-    subtotal += item.calculatedPrice;
-  });
+    message += "--------------------\n";
+    message += `Subtotal: ${formatRupee(runningSubtotal)}\n`;
+    message += `Delivery Charges: ${formatRupee(deliveryCharge)}\n`;
+    message += `*Total Payable: ${formatRupee(runningSubtotal + deliveryCharge)}*\n`;
+    message += "--------------------\n\n";
+    message += `Name: ${customerName}\n`;
+    message += `Address: ${customerAddress}\n`;
+    message += `Pincode: ${pincode}\n\n`;
+    message += `Payment: ${paid ? "Paid via UPI" : "Not paid (COD)"}\n\n`;
+    message += "📞 Contact: +91 9404955707\n";
+    message += "📧 Email: indiyumm23@gmail.com\n";
 
-  message += "----------------------\n";
-  message += `Subtotal: ₹${subtotal}\n`;
-  message += `Delivery Charges: ₹${deliveryCharge}\n`;
-  message += `Total Payable: ₹${subtotal + deliveryCharge}\n`;
-  message += "----------------------\n\n";
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, "_blank");
 
-  message += `Name: ${customerName}\n`;
-  message += `Address: ${customerAddress}\n`;
-  message += `Pincode: ${pincode}\n\n`;
-
-  if (paymentId) {
-    message += `Payment: Paid via UPI\nPayment ID: ${paymentId}\n\n`;
-  } else if (paid) {
-    message += `Payment: Paid manually\n\n`;
-  } else {
-    message += `Payment: Cash on Delivery\n\n`;
-  }
-
-  message += "📞 Contact: +91 9404955707\n";
-  message += "📧 Email: indiyumm23@gmail.com";
-
-  window.open(`https://wa.me/919404955707?text=${encodeURIComponent(message)}`, "_blank");
-  setPaymentModalOpen(false);
-};
-
+    // close payment modal after sending WA
+    setPaymentModalOpen(false);
+    // Optionally clear cart or leave it for reference; here we'll clear cart
+    setCart([]);
+    setOrderPlaced(false);
+  };
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -560,11 +556,78 @@ const confirmPaidAndSendWA = (paid = false, paymentId = "") => {
               <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
               <h3>Complete Payment</h3>
 
-              <div className="payment-body">
-                <div className="qr-block">
-                  {/* Replace /upi-qr.png with your actual QR image in public folder */}
-                  <img src="/upi-qr.png" alt="UPI QR" className="upi-qr" />
-                </div>
+              
+<div className="payment-body">
+
+  {/* QR SCAN & PAY */}
+  <div className="qr-block" style={{ textAlign: "center" }}>
+    <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
+    <img 
+      src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} 
+      alt="Dynamic QR" 
+      style={{ width: 230, height: 230, borderRadius: 10 }}
+    />
+  </div>
+
+  {/* PAYMENT DETAILS */}
+  <div className="payment-details">
+    <p><strong>UPI ID:</strong> {UPI_ID} 
+      <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
+    </p>
+
+    <p><strong>Amount:</strong> ₹{modalAmount}</p>
+
+    {/* RAZORPAY BUTTON */}
+    <button
+      className="btn-pay-now"
+      style={{ backgroundColor: "#0F9D58", color: "#fff" }}
+      onClick={() => {
+        const amt = modalAmount * 100;
+        const opt = {
+          key: "rzp_live_RjEUaiYidPpkZD",
+          amount: amt,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: (resp) =>
+            confirmPaidAndSendWA(true, resp.razorpay_payment_id || "")
+        };
+        new window.Razorpay(opt).open();
+      }}
+    >
+      Pay Securely (Razorpay)
+    </button>
+
+    {/* COD */}
+    <button 
+      className="btn-pay-now" 
+      style={{ backgroundColor: "#444", color: "#fff" }}
+      onClick={() => confirmPaidAndSendWA(false)}
+    >
+      Cash on Delivery (COD)
+    </button>
+
+    {/* MARK AS PAID */}
+    <button
+      className="btn-mark-paid"
+      style={{ backgroundColor: "#0A66C2", color: "#fff" }}
+      onClick={() => confirmPaidAndSendWA(true)}
+    >
+      Mark as Paid
+    </button>
+
+    {/* GO BACK */}
+    <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
+      Go Back
+    </button>
+
+    <p className="small-muted" style={{ marginTop: 12 }}>
+      After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
+    </p>
+  </div>
+
+</div>
+
 
                 <div className="payment-details">
                   <p><strong>UPI ID:</strong> {UPI_ID} <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button></p>
@@ -596,7 +659,7 @@ window.location.href = gpayLink;
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
                   </p>
                 </div>
-              </div>
+              
             </motion.div>
           </motion.div>
         )}
