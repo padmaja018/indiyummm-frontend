@@ -660,7 +660,7 @@ window.location.href = gpayLink;
                     After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
                   </p>
                 </div>
-              </div>
+             
             </motion.div>
           </motion.div>
         )}
