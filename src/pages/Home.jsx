@@ -521,6 +521,9 @@ export default function App() {
     }
   };
 
+    new window.Razorpay(opt).open();
+  
+
   // When user clicks "Send order" after returning from UPI app
   const handleReturnConfirmed = () => {
     // remove waiting flag to avoid showing again
