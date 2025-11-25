@@ -1,13 +1,9 @@
-
-// Home_updated.jsx
+// App.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X } from "lucide-react";
 import "../App.css";
 import { Link } from "react-router-dom";
-
-// Backend URL for Razorpay create-order / verify endpoints. Replace if your backend URL differs:
-const BACKEND_URL = "https://indiyummm-backend.onrender.com";
 
 
 export default function App() {
@@ -19,6 +15,7 @@ export default function App() {
   const [reviews, setReviews] = useState({}); // { productName: [reviews] }
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [paymentSummaryOpen, setPaymentSummaryOpen] = useState(false);
+
 
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
   const [customerName, setCustomerName] = useState("");
@@ -32,7 +29,6 @@ export default function App() {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [returnModalOpen, setReturnModalOpen] = useState(false); // NEW: shows when user returns from UPI app
 
   // Recipient WhatsApp number for orders (international format, no +)
   const whatsappNumber = "919518501138";
@@ -44,7 +40,7 @@ export default function App() {
     { name: "Shegdana Chutney", price: 680, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
     { name: "Javas Chutney", price: 680, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
     { name: "Karala Chutney", price: 680, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
-    { name: "Sesame Chutney", price: 20, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
+    { name: "Sesame Chutney", price: 680, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
   ];
 
   const pickles = [
@@ -179,117 +175,85 @@ export default function App() {
 
   // ===== WhatsApp auto-fill: full cart order =====
   const handleWhatsAppOrder = () => {
-    if (cart.length === 0) {
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
-      return;
-    }
+  if (cart.length === 0) {
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
+    return;
+  }
 
-    // If missing details → OPEN POPUP instead of alert()
-    if (!customerName || !customerAddress || String(pincode).length !== 6) {
-      setDetailsModalOpen(true);
-      return;
-    }
+  // If missing details → OPEN POPUP instead of alert()
+  if (!customerName || !customerAddress || String(pincode).length !== 6) {
+    setDetailsModalOpen(true);
+    return;
+  }
 
-    // If details are complete → open payment modal
-    setOrderPlaced(true);
-    setPaymentSummaryOpen(true);
-  };
+  // If details are complete → open payment modal
+  setOrderPlaced(true);
+  setPaymentSummaryOpen(true);
+};
 
-  const clearSavedData = () => {
-    try {
-      localStorage.removeItem("savedCart");
-      localStorage.removeItem("savedCustomerName");
-      localStorage.removeItem("savedAddress");
-      localStorage.removeItem("savedPincode");
-      localStorage.removeItem("savedDeliveryCharge");
-      localStorage.removeItem("savedSelectedProduct");
-      localStorage.removeItem("waitingForUPIPayment");
-      localStorage.removeItem("savedOrderPlaced");
-      localStorage.removeItem("savedPaymentSummaryOpen");
-    } catch (e) {
-      console.warn("clearSavedData error", e);
-    }
-  };
+const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
+  // method: "razorpay" | "cod" | "upi"
+  let runningSubtotal = 0;
+  let message = "🛍️ *Indiyummm Order Details*\n\n";
 
-  const saveAllToStorage = (extra = {}) => {
-    try {
-      localStorage.setItem("savedCart", JSON.stringify(cart));
-      localStorage.setItem("savedCustomerName", customerName);
-      localStorage.setItem("savedAddress", customerAddress);
-      localStorage.setItem("savedPincode", pincode);
-      localStorage.setItem("savedDeliveryCharge", deliveryCharge === null ? "" : String(deliveryCharge));
-      localStorage.setItem("savedSelectedProduct", selectedProduct ? JSON.stringify(selectedProduct) : "");
-      localStorage.setItem("savedOrderPlaced", orderPlaced ? "1" : "");
-      localStorage.setItem("savedPaymentSummaryOpen", paymentSummaryOpen ? "1" : "");
-      // If caller wants to mark we are heading to UPI/External
-      if (extra.waiting) localStorage.setItem("waitingForUPIPayment", "yes");
-    } catch (e) {
-      console.warn("saveAllToStorage error", e);
-    }
-  };
+  if (cart && cart.length > 0) {
+    cart.forEach((item, idx) => {
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+      message += `Qty: ${item.qty} kg\n`;
+      message += `Price: ₹${item.calculatedPrice}\n\n`;
+      runningSubtotal += item.calculatedPrice;
+    });
+  } else if (selectedProduct) {
+    const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
+    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
+    message += `Qty: ${selectedProduct.packKg} kg\n`;
+    message += `Price: ₹${priceSingle}\n\n`;
+    runningSubtotal = priceSingle;
+  }
+
+  const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
+  const totalPayable = runningSubtotal + delivery;
+
+  message += "--------------------\n";
+  message += `Subtotal: ₹${runningSubtotal}\n`;
+  message += `Delivery Charges: ₹${delivery}\n`;
+  message += `*Total Payable: ₹${totalPayable}*\n`;
+  message += "--------------------\n\n";
+
+  message += `Name: ${customerName}\n`;
+  message += `Address: ${customerAddress}\n`;
+  message += `Pincode: ${pincode}\n\n`;
+
+  if (method === "razorpay") {
+    message += "Payment: Paid via Razorpay\n\n";
+    if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
+  } else if (method === "cod") {
+    message += "Payment: Cash on Delivery Requested\n\n";
+  } else {
+    message += "Payment: Paid via UPI Scan\n\n";
+  }
+
+  message += "📞 Contact: +91 9404955707\n";
+  message += "📧 Email: indiyumm23@gmail.com\n";
+
+  try {
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, "_blank");
+  } catch (e) {
+    console.error("Failed to open WhatsApp:", e);
+    alert("Unable to open WhatsApp. Please copy the message and send manually.");
+  }
+
+  // Close modal and clear cart after opening WhatsApp
+  setPaymentModalOpen(false);
+  setCart([]);
+  setOrderPlaced(false);
+};
+
+
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-  const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
-    // method: "razorpay" | "cod" | "upi"
-    let runningSubtotal = 0;
-    let message = "🛍️ *Indiyummm Order Details*\n\n";
-
-    if (cart && cart.length > 0) {
-      cart.forEach((item, idx) => {
-        message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-        message += `Qty: ${item.qty} kg\n`;
-        message += `Price: ₹${item.calculatedPrice}\n\n`;
-        runningSubtotal += item.calculatedPrice;
-      });
-    } else if (selectedProduct) {
-      const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-      message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
-      message += `Qty: ${selectedProduct.packKg} kg\n`;
-      message += `Price: ₹${priceSingle}\n\n`;
-      runningSubtotal = priceSingle;
-    }
-
-    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-    const totalPayable = runningSubtotal + delivery;
-
-    message += "--------------------\n";
-    message += `Subtotal: ₹${runningSubtotal}\n`;
-    message += `Delivery Charges: ₹${delivery}\n`;
-    message += `*Total Payable: ₹${totalPayable}*\n`;
-    message += "--------------------\n\n";
-
-    message += `Name: ${customerName}\n`;
-    message += `Address: ${customerAddress}\n`;
-    message += `Pincode: ${pincode}\n\n`;
-
-    if (method === "razorpay") {
-      message += "Payment: Paid via Razorpay\n\n";
-      if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
-    } else if (method === "cod") {
-      message += "Payment: Cash on Delivery Requested\n\n";
-    } else {
-      message += "Payment: Paid via UPI Scan\n\n";
-    }
-
-    message += "📞 Contact: +91 9404955707\n";
-    message += "📧 Email: indiyumm23@gmail.com\n";
-
-    try {
-      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappURL, "_blank");
-    } catch (e) {
-      console.error("Failed to open WhatsApp:", e);
-      alert("Unable to open WhatsApp. Please copy the message and send manually.");
-    }
-
-    // Close modal and clear cart after opening WhatsApp
-    setPaymentModalOpen(false);
-    setCart([]);
-    setOrderPlaced(false);
-
-    // clear saved data in storage, as order has been sent
-    clearSavedData();
-  };
+  
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -356,213 +320,6 @@ export default function App() {
     checkDelivery(pincode, customerName, customerAddress);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pincode, customerName, customerAddress]);
-
-  // ---------- PERSISTENCE: restore saved data on load ----------
-  useEffect(() => {
-    try {
-      const sc = localStorage.getItem("savedCart");
-      if (sc) setCart(JSON.parse(sc));
-
-      const n = localStorage.getItem("savedCustomerName");
-      if (n) setCustomerName(n);
-
-      const a = localStorage.getItem("savedAddress");
-      if (a) setCustomerAddress(a);
-
-      const p = localStorage.getItem("savedPincode");
-      if (p) setPincode(p);
-
-      const d = localStorage.getItem("savedDeliveryCharge");
-      if (d !== null && d !== "") setDeliveryCharge(Number(d));
-
-      const sp = localStorage.getItem("savedSelectedProduct");
-      if (sp) {
-        try { setSelectedProduct(JSON.parse(sp)); } catch (e) { setSelectedProduct(null); }
-      }
-
-      const waiting = localStorage.getItem("waitingForUPIPayment");
-      if (waiting === "yes") {
-        // show modal asking user to confirm payment
-        setReturnModalOpen(true);
-      }
-    } catch (e) {
-      console.warn("Restore failed:", e);
-    }
-  }, []);
-
-  // ---------- PERSISTENCE: keep storage updated whenever relevant state changes ----------
-  useEffect(() => {
-    try {
-      localStorage.setItem("savedCart", JSON.stringify(cart));
-    } catch (e) {}
-  }, [cart]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedCustomerName", customerName); } catch(e) {}
-  }, [customerName]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedAddress", customerAddress); } catch(e) {}
-  }, [customerAddress]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedPincode", pincode); } catch(e) {}
-  }, [pincode]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedDeliveryCharge", deliveryCharge === null ? "" : String(deliveryCharge)); } catch(e) {}
-  }, [deliveryCharge]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedSelectedProduct", selectedProduct ? JSON.stringify(selectedProduct) : ""); } catch(e) {}
-  }, [selectedProduct]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedOrderPlaced", orderPlaced ? "1" : ""); } catch(e) {}
-  }, [orderPlaced]);
-
-  useEffect(() => {
-    try { localStorage.setItem("savedPaymentSummaryOpen", paymentSummaryOpen ? "1" : ""); } catch(e) {}
-  }, [paymentSummaryOpen]);
-
-  // Call this right before opening an external UPI app or navigating away for payment
-  const beginExternalPayment = (markWaiting = true, targetUrl = null) => {
-    // Save everything and mark waiting
-    saveAllToStorage({ waiting: markWaiting });
-    if (markWaiting) localStorage.setItem("waitingForUPIPayment", "yes");
-
-    // Optionally open the supplied URL (UPI intent)
-    if (targetUrl) {
-      // open in new tab to keep current tab stable if possible
-      window.open(targetUrl, "_blank");
-    }
-  };
-
-  // ---------- UPI intent helper ----------
-  const openUpiIntent = () => {
-    // Build UPI URI (some apps accept this)
-    const upiUri = `upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`;
-    beginExternalPayment(true, upiUri);
-  };
-
-  // ---------- Razorpay: save state then open Razorpay ----------
-  
-  const openRazorpay = async () => {
-    // Secure B2 flow: create order on backend, open Razorpay with returned order_id/key,
-    // then verify payment on backend before sending WhatsApp.
-    try {
-      // save state
-      beginExternalPayment(false);
-      const receipt = "indiyummm_" + Date.now();
-      const payload = {
-        amount: modalAmount, // rupees
-        receipt,
-        cart,
-        customer: { name: customerName, address: customerAddress, pincode }
-      };
-
-      const createRes = await fetch(`${BACKEND_URL}/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const createData = await createRes.json();
-      if (!createData || !createData.order_id) {
-        alert("Unable to create order on server. Please try again.");
-        console.error("create-order failed", createData);
-        return;
-      }
-
-      const options = {
-        key: createData.key_id || createData.keyId || createData.key, // backend provides key_id
-        amount: createData.amount, // in paise
-        currency: createData.currency || "INR",
-        name: "Indiyummm",
-        description: "Order Payment",
-        order_id: createData.order_id,
-        handler: async function (resp) {
-          // resp contains razorpay_payment_id, razorpay_order_id, razorpay_signature
-          try {
-            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: resp.razorpay_order_id,
-                razorpay_payment_id: resp.razorpay_payment_id,
-                razorpay_signature: resp.razorpay_signature,
-                receipt: receipt
-              })
-            });
-            const v = await verifyRes.json();
-            if (v && v.verified) {
-              try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
-              // payment verified on backend — send WA and clear cart
-              confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id);
-            } else {
-              alert("Payment could not be verified on server. Please contact support.");
-              console.error("verification failed", v);
-            }
-          } catch (err) {
-            console.error("verify-payment error", err);
-            alert("Server verification failed. Please contact support.");
-          }
-        },
-        modal: {
-          ondismiss: function() {
-            // user closed checkout without finishing
-            console.log("Razorpay modal dismissed");
-          }
-        }
-      };
-      new window.Razorpay(options).open();
-    } catch (err) {
-      console.error("openRazorpay error:", err);
-      alert("Failed to start payment. Please try again.");
-    }
-  };
-
-    
-  // When user clicks "Send order" after returning from UPI app
-  const handleReturnConfirmed = () => {
-    // remove waiting flag to avoid showing again
-    try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
-    setReturnModalOpen(false);
-    // send WA (message will indicate UPI paid)
-    confirmPaidAndSendWA("upi");
-  };
-
-  const handleReturnNotPaid = () => {
-    try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
-    setReturnModalOpen(false);
-    // leave saved data intact so user can retry payment
-    alert("No problem — your cart and details are saved. You can try payment again.");
-  };
-
-  // When user confirms "Mark as Paid" we still send WA order so seller has details
-
-
-  const handleWhatsAppOrderClickBeforeExternal = () => {
-    // When user is about to go to external payment flow (e.g., they hit Continue to Payment),
-    // we mark waitingForUPIPayment and save state, so if they return we can restore.
-    saveAllToStorage();
-    // We will not set waitingForUPIPayment here until they actually use external UPI,
-    // but when opening the external UPI intent we set it.
-  };
-
-  const handleSmoothOpenPayment = () => {
-    // Called when user presses "Continue to Payment" from summary modal
-    saveAllToStorage();
-    setPaymentSummaryOpen(false);
-    setPaymentModalOpen(true);
-  };
-
-  const handleSmoothScrollClick = (e, id) => {
-    handleSmoothScroll(e, id);
-  };
-
-  // copy UPI ID helper unchanged above
-
-  // ---------------- UI & render ----------------
 
   return (
     <div className="app">
@@ -698,69 +455,69 @@ export default function App() {
         )}
       </AnimatePresence>
       {/* Customer Details Modal */}
-    <AnimatePresence>
-      {detailsModalOpen && (
-        <motion.div className="modal-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+<AnimatePresence>
+  {detailsModalOpen && (
+    <motion.div className="modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div className="modal"
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.8 }}
+      >
+        <button className="modal-close" onClick={() => setDetailsModalOpen(false)}>
+          <X />
+        </button>
+
+        <h3>Enter Your Details</h3>
+
+        <input
+          type="text"
+          placeholder="Your Name"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Full Address"
+          value={customerAddress}
+          onChange={(e) => setCustomerAddress(e.target.value)}
+        />
+        <input
+          type="text"
+          maxLength={6}
+          placeholder="Pincode"
+          value={pincode}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+            setPincode(val);
+          }}
+        />
+
+        <button
+          className="btn-whatsapp"
+          style={{ marginTop: 10 }}
+          onClick={() => {
+            if (!customerName || !customerAddress || pincode.length !== 6) {
+              alert("Please enter valid details.");
+              return;
+            }
+            setDetailsModalOpen(false);
+            setOrderPlaced(true);
+            setPaymentSummaryOpen(true);
+          }}
         >
-          <motion.div className="modal"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.8 }}
-          >
-            <button className="modal-close" onClick={() => setDetailsModalOpen(false)}>
-              <X />
-            </button>
-
-            <h3>Enter Your Details</h3>
-
-            <input
-              type="text"
-              placeholder="Your Name"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Full Address"
-              value={customerAddress}
-              onChange={(e) => setCustomerAddress(e.target.value)}
-            />
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="Pincode"
-              value={pincode}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\\D/g, "").slice(0, 6);
-                setPincode(val);
-              }}
-            />
-
-            <button
-              className="btn-whatsapp"
-              style={{ marginTop: 10 }}
-              onClick={() => {
-                if (!customerName || !customerAddress || pincode.length !== 6) {
-                  alert("Please enter valid details.");
-                  return;
-                }
-                setDetailsModalOpen(false);
-                setOrderPlaced(true);
-                setPaymentSummaryOpen(true);
-              }}
-            >
-              Continue to Payment
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          Continue to Payment
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
 
-
+      
       {/* Payment Summary Modal */}
       <AnimatePresence>
         {paymentSummaryOpen && (
@@ -768,7 +525,7 @@ export default function App() {
             <motion.div className="modal" initial={{scale:0.8}} animate={{scale:1}} exit={{scale:0.8}} style={{maxHeight:"80vh",overflowY:"auto"}}>
               <button className="modal-close" onClick={()=>setPaymentSummaryOpen(false)}><X/></button>
               <h3>Order Summary</h3>
-
+              
 <div>
   {cart.length > 0 ? (
     cart.map((item, idx) => (
@@ -814,7 +571,7 @@ export default function App() {
                 <p><strong>Address:</strong> {customerAddress}</p>
                 <p><strong>Pincode:</strong> {pincode}</p>
               </div>
-              <button className="btn-whatsapp" onClick={()=>{handleSmoothOpenPayment();}} style={{marginTop:15}}>
+              <button className="btn-whatsapp" onClick={()=>{setPaymentSummaryOpen(false); setPaymentModalOpen(true);}} style={{marginTop:15}}>
                 Continue to Payment
               </button>
             </motion.div>
@@ -831,7 +588,7 @@ export default function App() {
               <button className="modal-close" onClick={() => setPaymentModalOpen(false)}><X /></button>
               <h3>Complete Payment</h3>
 
-
+              
 <div className="payment-body">
 
   {/* QR SCAN & PAY */}
@@ -842,7 +599,6 @@ export default function App() {
       alt="Dynamic QR" 
       style={{ width: 230, height: 230, borderRadius: 10 }}
     />
-    
   </div>
 
   {/* PAYMENT DETAILS */}
@@ -857,7 +613,19 @@ export default function App() {
     <button
       className="btn-pay-now"
       style={{ backgroundColor: "#0F9D58", color: "#fff" }}
-      onClick={() => { openRazorpay(); }}
+      onClick={() => {
+        const amt = modalAmount * 100;
+        const opt = {
+          key: "rzp_live_RjEUaiYidPpkZD",
+          amount: amt,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: (resp) =>
+            confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
+        };
+        new window.Razorpay(opt).open();
+      }}
     >
       Pay Securely (Razorpay)
     </button>
@@ -866,7 +634,7 @@ export default function App() {
   <button 
   className="btn-pay-now" 
   style={{ backgroundColor: "#444", color: "#fff" }}
-  onClick={() => { confirmPaidAndSendWA("cod"); }}
+  onClick={() => confirmPaidAndSendWA("cod")}
 >
   Cash on Delivery (COD)
 </button>
@@ -875,13 +643,9 @@ export default function App() {
     <button
       className="btn-mark-paid"
       style={{ backgroundColor: "#0A66C2", color: "#fff" }}
-      onClick={() => {
-        // User manually confirms they paid (useful for QR/UPI)
-        try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
-        confirmPaidAndSendWA("upi");
-      }}
+      onClick={() => confirmPaidAndSendWA("upi")}
     >
-      I HAVE PAID — SEND MY ORDER TO WHATSAPP
+      Mark as Paid
     </button>
 
     {/* GO BACK */}
@@ -890,32 +654,15 @@ export default function App() {
     </button>
 
     <p className="small-muted" style={{ marginTop: 12 }}>
-      After payment, tap <strong>I HAVE PAID — SEND MY ORDER TO WHATSAPP</strong> so we get your order immediately.
+      After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
     </p>
   </div>
 
                   <p className="small-muted" style={{ marginTop: 12 }}>
-                    After payment, tap <strong>I HAVE PAID — SEND MY ORDER TO WHATSAPP</strong> so we get your order immediately.
+                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
                   </p>
                 </div>
-
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Return-from-UPI Modal (Option 2 style) */}
-      <AnimatePresence>
-        {returnModalOpen && (
-          <motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="modal" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
-              <button className="modal-close" onClick={() => { setReturnModalOpen(false); try{ localStorage.removeItem("waitingForUPIPayment"); }catch(e){} }}><X/></button>
-              <h3>Welcome Back!</h3>
-              <p>If you completed the payment in your UPI app, tap below to send your order to WhatsApp. Your cart and details were restored.</p>
-              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                <button className="btn-whatsapp" onClick={() => handleReturnConfirmed()}>SEND ORDER TO WHATSAPP</button>
-                <button className="btn-add" onClick={() => handleReturnNotPaid()}>I haven't paid yet</button>
-              </div>
+              
             </motion.div>
           </motion.div>
         )}
@@ -927,6 +674,7 @@ export default function App() {
       </a>
 
       {/* About Section */}
+     
 
     </div>
   );
