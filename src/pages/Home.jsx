@@ -521,9 +521,6 @@ export default function App() {
     }
   };
 
-    new window.Razorpay(opt).open();
-  };
-
   // When user clicks "Send order" after returning from UPI app
   const handleReturnConfirmed = () => {
     // remove waiting flag to avoid showing again
@@ -932,7 +929,7 @@ export default function App() {
 
     </div>
   );
-
+}
 
 // ----------------- ProductSection Component -----------------
 function ProductSection({ id, title, products, onOrder, addToCart, color, reviews, reviewForm, setReviewForm, submitReview }) {
