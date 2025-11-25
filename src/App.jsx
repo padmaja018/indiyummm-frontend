@@ -13,7 +13,7 @@ export default function App() {
           <h1 className="logo">Indiyummm</h1>
           <nav className="desktop-nav">
             <Link to="/">Home</Link>
-            <Link to="/reviews">Reviews</Link>
+            
             <Link to="/about">About</Link>
           </nav>
         </header>
@@ -21,7 +21,7 @@ export default function App() {
         {/* Page Routes */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/reviews" element={<Reviews />} />
+         
           <Route path="/about" element={<About />} />
         </Routes>
 

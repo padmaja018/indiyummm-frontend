@@ -1281,3 +1281,65 @@ textarea { resize: vertical; min-height: 60px; }
     height: 120px !important;
   }
 }
+.enhanced-about {
+  background: linear-gradient(to bottom right, #FFF8E7, #fff);
+  border-radius: 12px;
+  padding: 30px 20px;
+  margin-top: 40px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.about-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #4a4a4a;
+  margin-bottom: 15px;
+}
+
+.about-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.highlight-box {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.enhanced-contact p {
+  margin: 5px 0;
+  color: #333;
+}
+/* --- FIX ABOUT PAGE LAYOUT (Do not remove) --- */
+.about-container,
+.about-section,
+.founder-section,
+.values,
+.process,
+.gallery,
+.video-section {
+  max-width: 1200px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  text-align: left !important;
+  padding: 20px !important;
+}
+
+/* Disable old About styles that break layout */
+.about,
+.about-page,
+.enhanced-about {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: left !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}

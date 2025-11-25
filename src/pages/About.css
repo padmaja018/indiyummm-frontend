@@ -1,0 +1,155 @@
+/* Overall Page */
+.about-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+  color: #333;
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Hero Banner */
+.about-hero {
+  background: linear-gradient(to right, #fff3c4, #ffe6bb);
+  padding: 60px 20px;
+  text-align: center;
+  border-radius: 14px;
+  margin-bottom: 40px;
+}
+
+.about-hero h1 {
+  font-size: 2.8rem;
+  font-weight: bold;
+  color: #3a5f3a;
+}
+
+.about-hero p {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+/* Sections */
+.about-section {
+  margin-bottom: 50px;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3a5f3a;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Founder Section */
+.founder-card {
+  display: flex;
+  gap: 25px;
+  background: #fff8e7;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  flex-wrap: wrap;
+}
+
+.founder-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.founder-info h3 {
+  margin-bottom: 10px;
+  color: #3a5f3a;
+  font-size: 1.6rem;
+}
+
+/* WHY GRID */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.why-card {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: 0.2s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Process Box */
+.process-box {
+  background: #fff9e6;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 15px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: 0.25s ease;
+}
+
+.gallery-grid img:hover {
+  transform: scale(1.03);
+}
+
+/* Fade Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.7s ease-out;
+}
+/* VIDEO SECTION */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 130%; /* Instagram vertical video ratio */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background: #000;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}

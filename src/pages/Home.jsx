@@ -1,5 +1,6 @@
 // App.jsx
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X } from "lucide-react";
 import "../App.css";
@@ -328,7 +329,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
           <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
           <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
           <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
-          <a href="#about" onClick={(e)=>handleSmoothScroll(e,'#about')}>About</a>
+          <Link to="/about">About</Link>
         </nav>
 
         <div className="nav-right">
@@ -349,7 +350,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
     <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
     <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
     <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
-    <a href="#about" onClick={(e)=>handleSmoothScroll(e,'#about')}>About</a>
+    <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
   </div>
 )}
 
@@ -672,15 +673,8 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
       </a>
 
       {/* About Section */}
-      <section id="about" className="about">
-        <h3>About Indiyummm</h3>
-        <p>Indiyummm brings you the authentic flavors of India — freshly made chutneys, masalas, and pickles crafted from 100% organic, natural ingredients. We believe in purity, tradition, and taste that connects you to home.</p>
-        <div className="contact-info">
-          <p><strong>📞 Contact:</strong> +91 9404955707</p>
-          <p><strong>📧 Email:</strong> indiyumm23@gmail.com</p>
-          <p><strong>📸 Follow us:</strong> <a href="https://instagram.com/indiyummm" target="_blank" rel="noreferrer">@indiyummm</a></p>
-        </div>
-      </section>
+     
+
     </div>
   );
 }
