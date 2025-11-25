@@ -447,7 +447,7 @@ export default function App() {
     beginExternalPayment(false);
     const amt = modalAmount * 100;
     const opt = {
-      key: "rzp_live_RjEUaiYidPpkZD",
+      key: "rzp_live_Rk1n4SeiHtIW3P",
       amount: amt,
       currency: "INR",
       name: "Indiyummm",
