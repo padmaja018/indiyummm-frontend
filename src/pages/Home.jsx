@@ -6,6 +6,10 @@ import { ShoppingCart, X } from "lucide-react";
 import "../App.css";
 import { Link } from "react-router-dom";
 
+// Backend URL for Razorpay create-order / verify endpoints. Replace if your backend URL differs:
+const BACKEND_URL = "https://indiyummm-backend.onrender.com";
+
+
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cart, setCart] = useState([]);
@@ -442,23 +446,81 @@ export default function App() {
   };
 
   // ---------- Razorpay: save state then open Razorpay ----------
-  const openRazorpay = () => {
-    // Save state; Razorpay usually returns control to same tab but it's okay to save
-    beginExternalPayment(false);
-    const amt = modalAmount * 100;
-    const opt = {
-      key: "rzp_live_Rk1n4SeiHtIW3P",
-      amount: amt,
-      currency: "INR",
-      name: "Indiyummm",
-      description: "Order Payment",
-      handler: (resp) => {
-        // order completed via razorpay
-        // clear waiting flag (if any) and send WA with razorpay id
-        try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
-        confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "");
+  
+  const openRazorpay = async () => {
+    // Secure B2 flow: create order on backend, open Razorpay with returned order_id/key,
+    // then verify payment on backend before sending WhatsApp.
+    try {
+      // save state
+      beginExternalPayment(false);
+      const receipt = "indiyummm_" + Date.now();
+      const payload = {
+        amount: modalAmount, // rupees
+        receipt,
+        cart,
+        customer: { name: customerName, address: customerAddress, pincode }
+      };
+
+      const createRes = await fetch(`${BACKEND_URL}/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const createData = await createRes.json();
+      if (!createData || !createData.order_id) {
+        alert("Unable to create order on server. Please try again.");
+        console.error("create-order failed", createData);
+        return;
       }
-    };
+
+      const options = {
+        key: createData.key_id || createData.keyId || createData.key, // backend provides key_id
+        amount: createData.amount, // in paise
+        currency: createData.currency || "INR",
+        name: "Indiyummm",
+        description: "Order Payment",
+        order_id: createData.order_id,
+        handler: async function (resp) {
+          // resp contains razorpay_payment_id, razorpay_order_id, razorpay_signature
+          try {
+            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature: resp.razorpay_signature,
+                receipt: receipt
+              })
+            });
+            const v = await verifyRes.json();
+            if (v && v.verified) {
+              try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
+              // payment verified on backend — send WA and clear cart
+              confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id);
+            } else {
+              alert("Payment could not be verified on server. Please contact support.");
+              console.error("verification failed", v);
+            }
+          } catch (err) {
+            console.error("verify-payment error", err);
+            alert("Server verification failed. Please contact support.");
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            // user closed checkout without finishing
+            console.log("Razorpay modal dismissed");
+          }
+        }
+      };
+      new window.Razorpay(options).open();
+    } catch (err) {
+      console.error("openRazorpay error:", err);
+      alert("Failed to start payment. Please try again.");
+    }
+  };
+
     new window.Razorpay(opt).open();
   };
 
@@ -870,7 +932,7 @@ export default function App() {
 
     </div>
   );
-}
+
 
 // ----------------- ProductSection Component -----------------
 function ProductSection({ id, title, products, onOrder, addToCart, color, reviews, reviewForm, setReviewForm, submitReview }) {
