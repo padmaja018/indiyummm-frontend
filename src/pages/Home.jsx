@@ -521,7 +521,7 @@ export default function App() {
     }
   };
 
-    new window.Razorpay(opt).open();
+
   
 
   // When user clicks "Send order" after returning from UPI app
