@@ -358,6 +358,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
   setPaymentModalOpen(false);
   setCart([]);
   setOrderPlaced(false);
+};
 
 
 
