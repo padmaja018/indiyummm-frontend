@@ -782,8 +782,7 @@ export default function App() {
       alt="Dynamic QR" 
       style={{ width: 230, height: 230, borderRadius: 10 }}
     />
-    <p style={{fontSize:12, marginTop:8}}>Tip: Open scan in your UPI app or click "Open UPI app" below.</p>
-    <button className="btn-pay-now" onClick={()=>{ openUpiIntent(); }} style={{marginTop:8}}>Open UPI App</button>
+    
   </div>
 
   {/* PAYMENT DETAILS */}
