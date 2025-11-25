@@ -26,110 +26,6 @@ export default function App() {
   // UPI & payment modal
   const UPI_ID = "aghogare1@okaxis";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  // ---------- LocalStorage: restore & save (auto-restore after UPI intent returns) ----------
-  const [restoredBanner, setRestoredBanner] = useState(false);
-
-  // Restore saved app state on load
-  useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem("cart");
-      const savedDetails = localStorage.getItem("customerDetails");
-      const savedSelectedProduct = localStorage.getItem("selectedProduct");
-      const savedOrderPlaced = localStorage.getItem("orderPlaced");
-      const savedPaymentSummaryOpen = localStorage.getItem("paymentSummaryOpen");
-      const savedPaymentModalOpen = localStorage.getItem("paymentModalOpen");
-
-      let restored = false;
-
-      if (savedCart) {
-        setCart(JSON.parse(savedCart));
-        restored = true;
-      }
-      if (savedDetails) {
-        const d = JSON.parse(savedDetails);
-        setCustomerName(d.customerName || "");
-        setCustomerAddress(d.customerAddress || "");
-        setPincode(d.pincode || "");
-        restored = true;
-      }
-      if (savedSelectedProduct) {
-        setSelectedProduct(JSON.parse(savedSelectedProduct));
-        restored = true;
-      }
-      if (savedOrderPlaced) {
-        setOrderPlaced(JSON.parse(savedOrderPlaced));
-        restored = true;
-      }
-      if (savedPaymentSummaryOpen && JSON.parse(savedPaymentSummaryOpen) === true) {
-        setPaymentSummaryOpen(true);
-        restored = true;
-      }
-      if (savedPaymentModalOpen && JSON.parse(savedPaymentModalOpen) === true) {
-        setPaymentModalOpen(true);
-        restored = true;
-      }
-
-      if (restored) {
-        // show a temporary banner so user knows the order was restored
-        setRestoredBanner(true);
-        setTimeout(() => setRestoredBanner(false), 4500);
-      }
-    } catch (e) {
-      console.error("Error restoring from localStorage:", e);
-    }
-  }, []);
-
-  // Save cart automatically
-  useEffect(() => {
-    try {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    } catch(e) { console.error("Save cart failed", e); }
-  }, [cart]);
-
-  // Save customer details automatically
-  useEffect(() => {
-    try {
-      localStorage.setItem("customerDetails", JSON.stringify({
-        customerName,
-        customerAddress,
-        pincode
-      }));
-    } catch(e) { console.error("Save details failed", e); }
-  }, [customerName, customerAddress, pincode]);
-
-  // Save selected product (quick-order)
-  useEffect(() => {
-    try {
-      if (selectedProduct) localStorage.setItem("selectedProduct", JSON.stringify(selectedProduct));
-      else localStorage.removeItem("selectedProduct");
-    } catch(e) { console.error("Save selectedProduct failed", e); }
-  }, [selectedProduct]);
-
-  // Save orderPlaced & payment summary/modal states
-  useEffect(() => {
-    try { localStorage.setItem("orderPlaced", JSON.stringify(orderPlaced)); } catch(e){}
-  }, [orderPlaced]);
-
-  useEffect(() => {
-    try { localStorage.setItem("paymentSummaryOpen", JSON.stringify(paymentSummaryOpen)); } catch(e){}
-  }, [paymentSummaryOpen]);
-
-  useEffect(() => {
-    try { localStorage.setItem("paymentModalOpen", JSON.stringify(paymentModalOpen)); } catch(e){}
-  }, [paymentModalOpen]);
-
-  // Utility: clear saved order data after finalising (called when sending WA)
-  const clearSavedOrder = () => {
-    try {
-      localStorage.removeItem("cart");
-      localStorage.removeItem("selectedProduct");
-      localStorage.removeItem("customerDetails");
-      localStorage.removeItem("orderPlaced");
-      localStorage.removeItem("paymentSummaryOpen");
-      localStorage.removeItem("paymentModalOpen");
-    } catch(e) { console.error("Clear saved order failed", e); }
-  };
-
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -176,12 +72,6 @@ export default function App() {
 
   // ---------------- helpers ----------------
   const roundKg = (n) => Math.round(n * 100) / 100; // 2 decimals for kg
-
-  const clearCartAndSaved = () => {
-    setCart([]);
-    try { localStorage.removeItem("cart"); } catch(e){}
-  };
-
   const calcPriceForKg = (pricePerKg, kg) => Math.round(pricePerKg * kg);
   const formatRupee = (v) => `₹${Math.round(v)}`;
 
@@ -433,13 +323,6 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
 
   return (
     <div className="app">
-      {/* Restored order banner */}
-      {restoredBanner && (
-        <div style={{ position: "fixed", top: 72, left: "50%", transform: "translateX(-50%)", background: "#FFFBEB", color: "#333", padding: "10px 18px", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", zIndex: 9999 }}>
-          <strong>Order restored</strong> — we recovered your cart and details after returning from payment.
-        </div>
-      )}
-
       {/* Navbar */}
       <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <h1 className="logo">Indiyummm</h1>
@@ -563,7 +446,7 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
 
                   <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                     <button className="btn-whatsapp w-full" onClick={handleWhatsAppOrder}>Place Order</button>
-                    <button className="btn-add" onClick={() => { clearCartAndSaved(); setCartOpen(false); }}>Clear</button>
+                    <button className="btn-add" onClick={() => { setCart([]); setCartOpen(false); }}>Clear</button>
                   </div>
                 </div>
               )}
