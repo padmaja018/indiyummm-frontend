@@ -35,12 +35,12 @@ export default function App() {
 
   // ---------------- products ----------------
   const chutneys = [
-    { name: "Coconut Chutney", price: 680, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
-    { name: "Garlic Chutney", price: 650, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
-    { name: "Shegdana Chutney", price: 660, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
-    { name: "Javas Chutney", price: 660, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
-    { name: "Karala Chutney", price: 660, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
-    { name: "Sesame Chutney", price: 20, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
+    { name: "Coconut Chutney", price: 690, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
+    { name: "Garlic Chutney", price: 680, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
+    { name: "Shegdana Chutney", price: 680, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
+    { name: "Javas Chutney", price: 680, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
+    { name: "Karala Chutney", price: 680, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
+    { name: "Sesame Chutney", price: 680, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
   ];
 
   const pickles = [
