@@ -629,13 +629,13 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
     </button>
 
     {/* COD */}
-    <button 
-      className="btn-pay-now" 
-      style={{ backgroundColor: "#444", color: "#fff" }}
-      onClick={() => { setPaymentMethod("cod"); confirmPaidAndSendWA(); }}
-    >
-      Cash on Delivery (COD)
-    </button>
+  <button 
+  className="btn-pay-now" 
+  style={{ backgroundColor: "#444", color: "#fff" }}
+  onClick={() => confirmPaidAndSendWA("cod")}
+>
+  Cash on Delivery (COD)
+</button>
 
     {/* MARK AS PAID */}
     <button
