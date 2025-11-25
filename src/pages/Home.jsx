@@ -1,9 +1,10 @@
 // App.jsx
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X } from "lucide-react";
 import "../App.css";
+import { Link } from "react-router-dom";
+
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
