@@ -788,9 +788,7 @@ export default function App() {
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
       </a>
 
-      <footer>
-        <p>© 2025 Indiyummm. All Rights Reserved managed and designed by digital launch studio25.</p>
-      </footer>
+  
 
     </div>
   );
