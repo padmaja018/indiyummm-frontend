@@ -616,12 +616,24 @@ const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
 
     {/* RAZORPAY BUTTON */}
     <button
-  className="btn-pay-now"
-  style={{ backgroundColor: "#0F9D58", color: "#fff" }}
-  onClick={openRazorpay}
->
-  Pay Securely (Razorpay)
-</button>
+      className="btn-pay-now"
+      style={{ backgroundColor: "#0F9D58", color: "#fff" }}
+      onClick={() => {
+        const amt = modalAmount * 100;
+        const opt = {
+          key: "rzp_live_RjEUaiYidPpkZD",
+          amount: amt,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: (resp) =>
+            confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
+        };
+        new window.Razorpay(opt).open();
+      }}
+    >
+      Pay Securely (Razorpay)
+    </button>
 
     {/* COD */}
   <button 
