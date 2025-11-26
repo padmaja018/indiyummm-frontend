@@ -1,7 +1,6 @@
-// IMPORTANT: Ensure you have this script in public/index.html: <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-// Home_patched_full.jsx (secure Razorpay flow)
-// Replace App export name if you prefer 'Home' — this file keeps the original export default App for drop-in replacement.
 
+// IMPORTANT: Ensure you have this script in public/index.html: <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+// App.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X } from "lucide-react";
@@ -10,6 +9,7 @@ import { Link } from "react-router-dom";
 
 // Backend URL for Razorpay B2 endpoints (create-order / verify-payment)
 const BACKEND_URL = "https://indiyummm-backend.onrender.com";
+
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -20,6 +20,7 @@ export default function App() {
   const [reviews, setReviews] = useState({}); // { productName: [reviews] }
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [paymentSummaryOpen, setPaymentSummaryOpen] = useState(false);
+
 
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
   const [customerName, setCustomerName] = useState("");
@@ -61,7 +62,7 @@ export default function App() {
 
   // Load reviews from backend (if available)
   useEffect(() => {
-    fetch(`${BACKEND_URL}/reviews`)
+    fetch("https://indiyummm-backend.onrender.com/reviews")
       .then(res => res.json())
       .then(data => setReviews(data || {}))
       .catch(err => console.error("Error loading reviews:", err));
@@ -177,131 +178,87 @@ export default function App() {
     return message;
   };
 
-  // Build WhatsApp message for the order (root-level so openRazorpay can use it)
-  const buildWhatsAppMessage = (method, paymentId) => {
-    let msg = "🛍️ *Indiyummm Order Details*\n\n";
-    let runningSubtotal = 0;
-    if (cart && cart.length > 0) {
-      cart.forEach((item, idx) => {
-        msg += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-        msg += `Qty: ${item.qty} kg\n`;
-        msg += `Price: ₹${item.calculatedPrice}\n\n`;
-        runningSubtotal += item.calculatedPrice;
-      });
-    } else if (selectedProduct) {
-      const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-      msg += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
-      msg += `Qty: ${selectedProduct.packKg} kg\n`;
-      msg += `Price: ₹${priceSingle}\n\n`;
-      runningSubtotal = priceSingle;
-    }
-
-    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-    const totalPayable = runningSubtotal + delivery;
-
-    msg += "--------------------\n";
-    msg += `Subtotal: ₹${runningSubtotal}\n`;
-    msg += `Delivery Charges: ₹${delivery}\n`;
-    msg += `*Total Payable: ₹${totalPayable}*\n`;
-    msg += "--------------------\n\n";
-
-    msg += `Name: ${customerName}\n`;
-    msg += `Address: ${customerAddress}\n`;
-    msg += `Pincode: ${pincode}\n\n`;
-
-    if (method === "razorpay") {
-      msg += "Payment: Paid via Razorpay\n\n";
-      if (paymentId) msg += `Razorpay ID: ${paymentId}\n\n`;
-    } else if (method === "cod") {
-      msg += "Payment: Cash on Delivery Requested\n\n";
-    } else {
-      msg += "Payment: Paid via UPI Scan\n\n";
-    }
-
-    msg += "📞 Contact: +91 9404955707\n";
-    msg += "📧 Email: indiyumm23@gmail.com\n";
-
-    return msg;
-  };
-
   // ===== WhatsApp auto-fill: full cart order =====
   const handleWhatsAppOrder = () => {
-    if (cart.length === 0) {
-      window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
-      return;
-    }
+  if (cart.length === 0) {
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Indiyummm 👋, I would like to know about your products.")}`, "_blank");
+    return;
+  }
 
-    // If missing details → OPEN POPUP instead of alert()
-    if (!customerName || !customerAddress || String(pincode).length !== 6) {
-      setDetailsModalOpen(true);
-      return;
-    }
+  // If missing details → OPEN POPUP instead of alert()
+  if (!customerName || !customerAddress || String(pincode).length !== 6) {
+    setDetailsModalOpen(true);
+    return;
+  }
 
-    // If details are complete → open payment modal
-    setOrderPlaced(true);
-    setPaymentSummaryOpen(true);
-  };
+  // If details are complete → open payment modal
+  setOrderPlaced(true);
+  setPaymentSummaryOpen(true);
+};
 
-  const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
-    let runningSubtotal = 0;
-    let message = "🛍️ *Indiyummm Order Details*\n\n";
+const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
+  // method: "razorpay" | "cod" | "upi"
+  let runningSubtotal = 0;
+  let message = "🛍️ *Indiyummm Order Details*\n\n";
 
-    if (cart && cart.length > 0) {
-      cart.forEach((item, idx) => {
-        message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-        message += `Qty: ${item.qty} kg\n`;
-        message += `Price: ₹${item.calculatedPrice}\n\n`;
-        runningSubtotal += item.calculatedPrice;
-      });
-    } else if (selectedProduct) {
-      const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-      message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
-      message += `Qty: ${selectedProduct.packKg} kg\n`;
-      message += `Price: ₹${priceSingle}\n\n`;
-      runningSubtotal = priceSingle;
-    }
+  if (cart && cart.length > 0) {
+    cart.forEach((item, idx) => {
+      message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+      message += `Qty: ${item.qty} kg\n`;
+      message += `Price: ₹${item.calculatedPrice}\n\n`;
+      runningSubtotal += item.calculatedPrice;
+    });
+  } else if (selectedProduct) {
+    const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
+    message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
+    message += `Qty: ${selectedProduct.packKg} kg\n`;
+    message += `Price: ₹${priceSingle}\n\n`;
+    runningSubtotal = priceSingle;
+  }
 
-    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-    const totalPayable = runningSubtotal + delivery;
+  const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
+  const totalPayable = runningSubtotal + delivery;
 
-    message += "--------------------\n";
-    message += `Subtotal: ₹${runningSubtotal}\n`;
-    message += `Delivery Charges: ₹${delivery}\n`;
-    message += `*Total Payable: ₹${totalPayable}*\n`;
-    message += "--------------------\n\n";
+  message += "--------------------\n";
+  message += `Subtotal: ₹${runningSubtotal}\n`;
+  message += `Delivery Charges: ₹${delivery}\n`;
+  message += `*Total Payable: ₹${totalPayable}*\n`;
+  message += "--------------------\n\n";
 
-    message += `Name: ${customerName}\n`;
-    message += `Address: ${customerAddress}\n`;
-    message += `Pincode: ${pincode}\n\n`;
+  message += `Name: ${customerName}\n`;
+  message += `Address: ${customerAddress}\n`;
+  message += `Pincode: ${pincode}\n\n`;
 
-    if (method === "razorpay") {
-      message += "Payment: Paid via Razorpay\n\n";
-      if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
-    } else if (method === "cod") {
-      message += "Payment: Cash on Delivery Requested\n\n";
-    } else {
-      message += "Payment: Paid via UPI Scan\n\n";
-    }
+  if (method === "razorpay") {
+    message += "Payment: Paid via Razorpay\n\n";
+    if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
+  } else if (method === "cod") {
+    message += "Payment: Cash on Delivery Requested\n\n";
+  } else {
+    message += "Payment: Paid via UPI Scan\n\n";
+  }
 
-    message += "📞 Contact: +91 9404955707\n";
-    message += "📧 Email: indiyumm23@gmail.com\n";
+  message += "📞 Contact: +91 9404955707\n";
+  message += "📧 Email: indiyumm23@gmail.com\n";
 
-    try {
-      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappURL, "_blank");
-    } catch (e) {
-      console.error("Failed to open WhatsApp:", e);
-      alert("Unable to open WhatsApp. Please copy the message and send manually.");
-    }
+  try {
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, "_blank");
+  } catch (e) {
+    console.error("Failed to open WhatsApp:", e);
+    alert("Unable to open WhatsApp. Please copy the message and send manually.");
+  }
 
-    // Close modal and clear cart after opening WhatsApp
-    setPaymentModalOpen(false);
-    setCart([]);
-    setOrderPlaced(false);
-  };
+  // Close modal and clear cart after opening WhatsApp
+  setPaymentModalOpen(false);
+  setCart([]);
+  setOrderPlaced(false);
+};
+
+
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
-
+  
 
   // WhatsApp order for single product
   const handleWhatsAppOrderSingle = (product) => {
@@ -345,7 +302,7 @@ export default function App() {
       text: form.text
     };
 
-    fetch(`${BACKEND_URL}/reviews`, {
+    fetch("https://indiyummm-backend.onrender.com/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newReview)
@@ -368,86 +325,6 @@ export default function App() {
     checkDelivery(pincode, customerName, customerAddress);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pincode, customerName, customerAddress]);
-
-  // ===== SECURE RAZORPAY FLOW =====
-  // This function creates an order on the backend then opens Razorpay with that order_id.
-  // After successful payment it calls /verify-payment and redirects to /payment-success on success.
-  const openRazorpay = async () => {
-    try {
-      const receipt = "indiyummm_" + Date.now();
-      const payload = {
-        amount: modalAmount, // in rupees
-        receipt,
-        cart,
-        customer: { name: customerName, address: customerAddress, pincode }
-      };
-
-      const createRes = await fetch(`${BACKEND_URL}/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const createData = await createRes.json();
-      if (!createData || !createData.order_id) {
-        alert("Unable to create order on server. Please try again.");
-        console.error("create-order failed", createData);
-        return;
-      }
-
-      const options = {
-        key: createData.key_id || createData.keyId || createData.key || "",
-        amount: createData.amount, // in paise
-        currency: createData.currency || "INR",
-        name: "Indiyummm",
-        description: "Order Payment",
-        order_id: createData.order_id,
-        handler: async function (resp) {
-          try {
-            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: resp.razorpay_order_id,
-                razorpay_payment_id: resp.razorpay_payment_id,
-                razorpay_signature: resp.razorpay_signature,
-                receipt
-              })
-            });
-            const v = await verifyRes.json();
-            if (v && v.verified) {
-              // Build WA message and redirect to success page
-              const waMsg = buildWhatsAppMessage("razorpay", resp.razorpay_payment_id);
-              // redirect
-              if (typeof window !== "undefined" && window.location) {
-                window.location.href = `/payment-success?orderId=${encodeURIComponent(resp.razorpay_order_id)}&amount=${encodeURIComponent(modalAmount)}&waMessage=${encodeURIComponent(waMsg)}`;
-              }
-            } else {
-              alert("Payment verification failed on server. Please contact support.");
-              console.error("verification failed", v);
-            }
-          } catch (err) {
-            console.error("verify-payment error", err);
-            alert("Server verification failed. Please contact support.");
-          }
-        },
-        modal: {
-          ondismiss: function() {
-            console.log("Razorpay modal dismissed");
-          }
-        }
-      };
-
-      if (typeof window !== "undefined" && window.Razorpay) {
-        new window.Razorpay(options).open();
-      } else {
-        alert("Razorpay checkout not available. Please use UPI QR or COD.");
-        console.warn("Razorpay script missing; options:", options);
-      }
-    } catch (err) {
-      console.error("openRazorpay error:", err);
-      alert("Failed to start payment. Please try again.");
-    }
-  };
 
   return (
     <div className="app">
@@ -482,6 +359,7 @@ export default function App() {
     <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
   </div>
 )}
+
 
       {/* Hero Section */}
       <section id="home" className="hero">
@@ -736,11 +614,23 @@ export default function App() {
 
     <p><strong>Amount:</strong> ₹{modalAmount}</p>
 
-    {/* RAZORPAY BUTTON - now calls openRazorpay (secure flow) */}
+    {/* RAZORPAY BUTTON */}
     <button
       className="btn-pay-now"
       style={{ backgroundColor: "#0F9D58", color: "#fff" }}
-      onClick={openRazorpay}
+      onClick={() => {
+        const amt = modalAmount * 100;
+        const opt = {
+          key: "rzp_live_Rk1n4SeiHtIW3P",
+          amount: amt,
+          currency: "INR",
+          name: "Indiyummm",
+          description: "Order Payment",
+          handler: (resp) =>
+            confirmPaidAndSendWA("razorpay", resp.razorpay_payment_id || "")
+        };
+        new window.Razorpay(opt).open();
+      }}
     >
       Pay Securely (Razorpay)
     </button>
@@ -788,9 +678,8 @@ export default function App() {
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
       </a>
 
-      <footer>
-        <p>© 2025 Indiyummm. All Rights Reserved managed and designed by digital launch studio25.</p>
-      </footer>
+      {/* About Section */}
+     
 
     </div>
   );
@@ -815,6 +704,52 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
   const getKgFor = (label) => (packOptions.find(o => o.label === label) || packOptions[3]).kg;
 
   const priceFor = (pricePerKg, kg) => Math.round(pricePerKg * kg);
+
+  const buildWhatsAppMessage = (method, paymentId) => {
+    let msg = "🛍️ *Indiyummm Order Details*\n\n";
+    let runningSubtotal = 0;
+    if (cart && cart.length > 0) {
+      cart.forEach((item, idx) => {
+        msg += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
+        msg += `Qty: ${item.qty} kg\n`;
+        msg += `Price: ₹${item.calculatedPrice}\n\n`;
+        runningSubtotal += item.calculatedPrice;
+      });
+    } else if (selectedProduct) {
+      const priceSingle = Math.round(selectedProduct.price * selectedProduct.packKg);
+      msg += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
+      msg += `Qty: ${selectedProduct.packKg} kg\n`;
+      msg += `Price: ₹${priceSingle}\n\n`;
+      runningSubtotal = priceSingle;
+    }
+
+    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
+    const totalPayable = runningSubtotal + delivery;
+
+    msg += "--------------------\n";
+    msg += `Subtotal: ₹${runningSubtotal}\n`;
+    msg += `Delivery Charges: ₹${delivery}\n`;
+    msg += `*Total Payable: ₹${totalPayable}*\n`;
+    msg += "--------------------\n\n";
+
+    msg += `Name: ${customerName}\n`;
+    msg += `Address: ${customerAddress}\n`;
+    msg += `Pincode: ${pincode}\n\n`;
+
+    if (method === "razorpay") {
+      msg += "Payment: Paid via Razorpay\n\n";
+      if (paymentId) msg += `Razorpay ID: ${paymentId}\n\n`;
+    } else if (method === "cod") {
+      msg += "Payment: Cash on Delivery Requested\n\n";
+    } else {
+      msg += "Payment: Paid via UPI Scan\n\n";
+    }
+
+    msg += "📞 Contact: +91 9404955707\n";
+    msg += "📧 Email: indiyumm23@gmail.com\n";
+
+    return msg;
+  };
 
   return (
     <section id={id} className="products">
@@ -894,3 +829,87 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
     </section>
   );
 }
+
+
+  const openRazorpay = async () => {
+    // Secure B2 flow: create order on backend, open Razorpay with returned order_id/key,
+    // then verify payment on backend before sending WhatsApp / redirect to success page.
+    try {
+      // Save current state
+      beginExternalPayment(false);
+      const receipt = "indiyummm_" + Date.now();
+      const payload = {
+        amount: modalAmount, // in rupees
+        receipt,
+        cart,
+        customer: { name: customerName, address: customerAddress, pincode }
+      };
+
+      const createRes = await fetch(`${BACKEND_URL}/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const createData = await createRes.json();
+      if (!createData || !createData.order_id) {
+        alert("Unable to create order on server. Please try again.");
+        console.error("create-order failed", createData);
+        return;
+      }
+
+      const options = {
+        key: createData.key_id || createData.keyId || createData.key, // backend provides key_id
+        amount: createData.amount, // in paise
+        currency: createData.currency || "INR",
+        name: "Indiyummm",
+        description: "Order Payment",
+        order_id: createData.order_id,
+        handler: async function (resp) {
+          try {
+            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature: resp.razorpay_signature,
+                receipt
+              })
+            });
+            const v = await verifyRes.json();
+            if (v && v.verified) {
+              try { localStorage.removeItem("waitingForUPIPayment"); } catch(e){}
+              // Build WA message and redirect to success page
+              const waMsg = buildWhatsAppMessage("razorpay", resp.razorpay_payment_id);
+              // navigate to success page with order info
+              if (typeof window !== "undefined" && window.location) {
+                window.location.href = `/payment-success?orderId=${encodeURIComponent(resp.razorpay_order_id)}&amount=${encodeURIComponent(modalAmount)}&waMessage=${encodeURIComponent(waMsg)}`;
+              }
+            } else {
+              alert("Payment verification failed on server. Please contact support.");
+              console.error("verification failed", v);
+            }
+          } catch (err) {
+            console.error("verify-payment error", err);
+            alert("Server verification failed. Please contact support.");
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            console.log("Razorpay modal dismissed");
+          }
+        }
+      };
+
+      // ensure Razorpay script is loaded
+      if (typeof window !== "undefined" && window.Razorpay) {
+        new window.Razorpay(options).open();
+      } else {
+        alert("Razorpay checkout not available. Please use UPI QR or COD.");
+        console.warn("Razorpay script missing; options:", options);
+      }
+    } catch (err) {
+      console.error("openRazorpay error:", err);
+      alert("Failed to start payment. Please try again.");
+    }
+  };
