@@ -117,10 +117,10 @@ export default function App() {
     }
   };
 
-  // include selectedProduct (quick view) weight when cart is empty/has items
-const totalKgFromCart = cart.reduce((sum, item) => sum + item.qty, 0);
-const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
-const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100; // keep 2 decimals
+  // totals (safe math if deliveryCharge null)
+  const subtotal = cart.reduce((sum, item) => sum + (item.calculatedPrice ?? (item.qty * item.pricePerKg)), 0);
+  const safeDelivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
+  const totalPrice = subtotal + (cart.length > 0 ? safeDelivery : 0);
 
   // Determine modal amount for payment: if ordering from cart use totalPrice, else if ordering single product use selectedProduct price + delivery
   const modalAmount = (cart.length > 0)
@@ -130,40 +130,37 @@ const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100; // keep 
         : 0
       );
 
+  const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
 
- // -------------------------------
-// DELIVERY CHARGES (NEW RULE)
-// Maharashtra → ₹150 per kg
-// Outside Maharashtra → ₹250 per kg
-// -------------------------------
-const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
-  const s = String(pin || "").trim();
-  if (!nameVal || !addrVal) {
-    setDeliveryCharge(null);
-    return;
-  }
-  if (s.length !== 6) {
-    setDeliveryCharge(null);
-    return;
-  }
+  // ---------------- Pincode / Delivery logic ----------------
+  // Rule:
+  // - 411xxx => FREE (Pune)
+  // - 40,41,42,43,44 => Maharashtra => ₹39
+  // - others => ₹59
+  // - missing / invalid / missing name/address => deliveryCharge = null (force user to fill)
+  const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
+    const s = String(pin || "").trim();
+    if (!nameVal || !addrVal) {
+      setDeliveryCharge(null);
+      return;
+    }
+    if (s.length !== 6) {
+      setDeliveryCharge(null);
+      return;
+    }
+    const first3 = s.substring(0, 3);
+    const first2 = s.substring(0, 2);
 
-  const first2 = s.substring(0, 2);
-  const isMaharashtra = ["40", "41", "42", "43", "44"].includes(first2);
+    if (first3 === "411") {
+      setDeliveryCharge(0); // FREE Pune
+      return;
+    }
 
-  const ratePerKg = isMaharashtra ? 150 : 250;
+    const mhStarts = ["40", "41", "42", "43", "44"];
+    const isMaharashtra = mhStarts.includes(first2);
 
-  // include selectedProduct weight too (handles quick-view single product orders)
-  const totalKgFromCart = cart.reduce((sum, item) => sum + item.qty, 0);
-  const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
-  const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100;
-
-  if (totalKg === 0) {
-    setDeliveryCharge(null);
-    return;
-  }
-
-  setDeliveryCharge(Math.round(ratePerKg * totalKg));
-};
+    setDeliveryCharge(isMaharashtra ? 70 : 160);
+  };
 
   // Old simpler message kept for floating whatsapp link
   const getCartMessage = () => {
