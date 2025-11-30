@@ -11,11 +11,12 @@ export default function CustomerLogin() {
 
   const BACKEND = "https://indiyummm-backend.onrender.com";
 
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("Logging in...");
     try {
-const res = await fetch(`https://indiyummm-backend.onrender.com/login`, {
+      const res = await fetch(`https://indiyummm-backend.onrender.com/login`, {
 
         method: "POST",
         headers: { "Content-Type": "application/json" },
