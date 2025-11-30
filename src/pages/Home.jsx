@@ -122,7 +122,21 @@ const totalKgFromCart = cart.reduce((sum, item) => sum + item.qty, 0);
 const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
 const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100; // keep 2 decimals
 
-  const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
+  // Determine modal amount for payment: if ordering from cart use totalPrice, else if ordering single product use selectedProduct price + delivery
+  const modalAmount = (cart.length > 0)
+    ? totalPrice
+    : (selectedProduct
+        ? (calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (typeof deliveryCharge === "number" ? deliveryCharge : 0))
+        : 0
+      );
+
+
+ // -------------------------------
+// DELIVERY CHARGES (NEW RULE)
+// Maharashtra → ₹150 per kg
+// Outside Maharashtra → ₹250 per kg
+// -------------------------------
+const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
   const s = String(pin || "").trim();
   if (!nameVal || !addrVal) {
     setDeliveryCharge(null);
@@ -151,20 +165,6 @@ const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100; // keep 
   setDeliveryCharge(Math.round(ratePerKg * totalKg));
 };
 
-  // Old simpler message kept for floating whatsapp link
-  const getCartMessage = () => {
-    if (cart.length === 0) return "Hello Indiyummm 👋, I’d like to know more about your products!";
-    let message = "Hello Indiyummm 👋, I would like to order:\n";
-    cart.forEach(item => {
-      message += `- ${item.name} (${item.packLabel}) x ${item.qty} = ${formatRupee(item.calculatedPrice)}\n`;
-    });
-    if (deliveryCharge === null) {
-      message += `\nDelivery: Pincode / details not entered\nTotal: ${formatRupee(subtotal)} (Delivery pending)\n`;
-    } else {
-      message += `\nTotal: ${formatRupee(modalAmount)}`;
-    }
-    return message;
-  };
 
   // Build WhatsApp message for the order (root-level so openRazorpay can use it)
   // ===== WhatsApp auto-fill: full cart order =====
