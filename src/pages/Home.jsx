@@ -39,12 +39,12 @@ export default function App() {
 
   // ---------------- products ----------------
   const chutneys = [
-    { name: "Coconut Chutney", price: 20, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
-    { name: "Garlic Chutney", price: 680, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
-    { name: "Shegdana Chutney", price: 680, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
-    { name: "Javas Chutney", price: 680, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
-    { name: "Karala Chutney", price: 680, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
-    { name: "Sesame Chutney", price: 680, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
+    { name: "Coconut Chutney", price: 800, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
+    { name: "Garlic Chutney", price: 700, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
+    { name: "Shegdana Chutney", price: 700, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
+    { name: "Javas Chutney", price: 700, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
+    { name: "Karala Chutney", price: 700, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
+    { name: "Sesame Chutney", price: 700, img:"/sesame-chutney.jpg", desc: "Nutty sesame delight with a balanced mix of spices and health benefits.", tag: "new"},
   ];
 
   const pickles = [
@@ -132,35 +132,31 @@ export default function App() {
 
   const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
 
-  // ---------------- Pincode / Delivery logic ----------------
-  // Rule:
-  // - 411xxx => FREE (Pune)
-  // - 40,41,42,43,44 => Maharashtra => ₹39
-  // - others => ₹59
-  // - missing / invalid / missing name/address => deliveryCharge = null (force user to fill)
-  const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
-    const s = String(pin || "").trim();
-    if (!nameVal || !addrVal) {
-      setDeliveryCharge(null);
-      return;
-    }
-    if (s.length !== 6) {
-      setDeliveryCharge(null);
-      return;
-    }
-    const first3 = s.substring(0, 3);
-    const first2 = s.substring(0, 2);
+ // -------------------------------
+// DELIVERY CHARGES (NEW RULE)
+// Maharashtra → ₹150 per kg
+// Outside Maharashtra → ₹250 per kg
+// -------------------------------
+const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
+  const s = String(pin || "").trim();
+  if (!nameVal || !addrVal) {
+    setDeliveryCharge(null);
+    return;
+  }
+  if (s.length !== 6) {
+    setDeliveryCharge(null);
+    return;
+  }
 
-    if (first3 === "411") {
-      setDeliveryCharge(0); // FREE Pune
-      return;
-    }
+  const first2 = s.substring(0, 2);
+  const isMaharashtra = ["40", "41", "42", "43", "44"].includes(first2);
 
-    const mhStarts = ["40", "41", "42", "43", "44"];
-    const isMaharashtra = mhStarts.includes(first2);
+  const ratePerKg = isMaharashtra ? 150 : 250;
 
-    setDeliveryCharge(isMaharashtra ? 70 : 160);
-  };
+  const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  setDeliveryCharge(Math.round(ratePerKg * totalKg));
+};
 
   // Old simpler message kept for floating whatsapp link
   const getCartMessage = () => {
