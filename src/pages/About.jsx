@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 import "./About.css";
+import Navbar from "../components/Navbar";
+
 
 export default function About() {
 

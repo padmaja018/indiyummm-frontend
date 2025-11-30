@@ -383,8 +383,6 @@ return (
         <a href="#chutneys" onClick={(e) => handleSmoothScroll(e, "#chutneys")}>Dry Chutneys</a>
         <a href="#pickles" onClick={(e) => handleSmoothScroll(e, "#pickles")}>Pickles</a>
         <Link to="/about">About</Link>
-
-        {/* Show My Orders always (App.jsx also shows it) */}
         <Link to="/my-orders">My Orders</Link>
 
         {/* Show login / signup only when not logged in; otherwise show greeting + logout link */}

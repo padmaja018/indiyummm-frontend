@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Confetti from "react-confetti";
 import "./PaymentSuccess.css";
+import Navbar from "../components/Navbar";
+
 
 export default function PaymentSuccess() {
   const location = useLocation();
