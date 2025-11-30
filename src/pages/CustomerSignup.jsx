@@ -6,7 +6,11 @@ export default function CustomerSignup() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
+<<<<<<< HEAD
   const BACKEND = "https://indiyummm-backend.onrender.com";
+=======
+  const BACKEND = "http://localhost:5000";
+>>>>>>> 245e7ba873aaa8b3be547414d4bdb78c8ec7454d
 
   const handleSubmit = async (e) => {
     e.preventDefault();

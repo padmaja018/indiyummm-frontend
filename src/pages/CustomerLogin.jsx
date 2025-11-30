@@ -8,13 +8,21 @@ export default function CustomerLogin() {
   const [msg, setMsg] = useState("");
 
 
+<<<<<<< HEAD
   const BACKEND = "https://indiyummm-backend.onrender.com";
+=======
+  const BACKEND = "http://localhost:5000";
+>>>>>>> 245e7ba873aaa8b3be547414d4bdb78c8ec7454d
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("Logging in...");
     try {
+<<<<<<< HEAD
       const res = await fetch(`"https://indiyummm-backend.onrender.com/login`, {
+=======
+      const res = await fetch(`http://localhost:5000/login`, {
+>>>>>>> 245e7ba873aaa8b3be547414d4bdb78c8ec7454d
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
