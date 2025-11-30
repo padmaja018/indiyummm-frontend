@@ -165,6 +165,20 @@ const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) =
   setDeliveryCharge(Math.round(ratePerKg * totalKg));
 };
 
+  // Old simpler message kept for floating whatsapp link
+  const getCartMessage = () => {
+    if (cart.length === 0) return "Hello Indiyummm 👋, I’d like to know more about your products!";
+    let message = "Hello Indiyummm 👋, I would like to order:\n";
+    cart.forEach(item => {
+      message += `- ${item.name} (${item.packLabel}) x ${item.qty} = ${formatRupee(item.calculatedPrice)}\n`;
+    });
+    if (deliveryCharge === null) {
+      message += `\nDelivery: Pincode / details not entered\nTotal: ${formatRupee(subtotal)} (Delivery pending)\n`;
+    } else {
+      message += `\nTotal: ${formatRupee(modalAmount)}`;
+    }
+    return message;
+  };
 
   // Build WhatsApp message for the order (root-level so openRazorpay can use it)
   // ===== WhatsApp auto-fill: full cart order =====
