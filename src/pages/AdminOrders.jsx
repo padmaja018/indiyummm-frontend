@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
-<<<<<<< HEAD
+
   const BACKEND = "https://indiyummm-backend.onrender.com";
-=======
-  const BACKEND = "http://localhost:5000";
->>>>>>> 245e7ba873aaa8b3be547414d4bdb78c8ec7454d
+
 
   useEffect(() => {
     if (!localStorage.getItem("admin_token")) {

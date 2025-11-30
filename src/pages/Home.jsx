@@ -9,7 +9,7 @@ import "../App.css";
 import { Link } from "react-router-dom";
 
 // Backend URL for Razorpay B2 endpoints (create-order / verify-payment)
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = "https://indiyummm-backend.onrender.com";
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
