@@ -117,27 +117,12 @@ export default function App() {
     }
   };
 
-  // totals (safe math if deliveryCharge null)
-  const subtotal = cart.reduce((sum, item) => sum + (item.calculatedPrice ?? (item.qty * item.pricePerKg)), 0);
-  const safeDelivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-  const totalPrice = subtotal + (cart.length > 0 ? safeDelivery : 0);
+  // include selectedProduct (quick view) weight when cart is empty/has items
+const totalKgFromCart = cart.reduce((sum, item) => sum + item.qty, 0);
+const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
+const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100; // keep 2 decimals
 
-  // Determine modal amount for payment: if ordering from cart use totalPrice, else if ordering single product use selectedProduct price + delivery
-  const modalAmount = (cart.length > 0)
-    ? totalPrice
-    : (selectedProduct
-        ? (calcPriceForKg(selectedProduct.price, selectedProduct.packKg) + (typeof deliveryCharge === "number" ? deliveryCharge : 0))
-        : 0
-      );
-
-  const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
-
- // -------------------------------
-// DELIVERY CHARGES (NEW RULE)
-// Maharashtra → ₹150 per kg
-// Outside Maharashtra → ₹250 per kg
-// -------------------------------
-const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
+  const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
   const s = String(pin || "").trim();
   if (!nameVal || !addrVal) {
     setDeliveryCharge(null);
@@ -153,7 +138,15 @@ const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) =
 
   const ratePerKg = isMaharashtra ? 150 : 250;
 
-  const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
+  // include selectedProduct weight too (handles quick-view single product orders)
+  const totalKgFromCart = cart.reduce((sum, item) => sum + item.qty, 0);
+  const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
+  const totalKg = Math.round((totalKgFromCart + selectedKg) * 100) / 100;
+
+  if (totalKg === 0) {
+    setDeliveryCharge(null);
+    return;
+  }
 
   setDeliveryCharge(Math.round(ratePerKg * totalKg));
 };
