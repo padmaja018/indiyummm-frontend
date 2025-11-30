@@ -133,34 +133,40 @@ export default function App() {
   const totalKg = cart.reduce((sum, item) => sum + item.qty, 0);
 
   // ---------------- Pincode / Delivery logic ----------------
-  // Rule:
-  // - 411xxx => FREE (Pune)
-  // - 40,41,42,43,44 => Maharashtra => ₹39
-  // - others => ₹59
-  // - missing / invalid / missing name/address => deliveryCharge = null (force user to fill)
-  const checkDelivery = (pin, nameVal = customerName, addrVal = customerAddress) => {
-    const s = String(pin || "").trim();
-    if (!nameVal || !addrVal) {
-      setDeliveryCharge(null);
-      return;
-    }
-    if (s.length !== 6) {
-      setDeliveryCharge(null);
-      return;
-    }
-    const first3 = s.substring(0, 3);
-    const first2 = s.substring(0, 2);
+  // -----------------------------------------
+// DELIVERY CHARGES (SAFE VERSION)
+// Maharashtra → ₹150 / kg
+// Outside Maharashtra → ₹250 / kg
+// -----------------------------------------
+const checkDelivery = (pin) => {
+  if (!pin || String(pin).length !== 6) {
+    setDeliveryCharge(null);
+    return;
+  }
 
-    if (first3 === "411") {
-      setDeliveryCharge(0); // FREE Pune
-      return;
-    }
+  const prefix2 = String(pin).substring(0, 2);
 
-    const mhStarts = ["40", "41", "42", "43", "44"];
-    const isMaharashtra = mhStarts.includes(first2);
+  // MAHARASHTRA PIN RANGE: 40–44
+  const isMaharashtra = ["40", "41", "42", "43", "44"].includes(prefix2);
 
-    setDeliveryCharge(isMaharashtra ? 150 : 250);
-  };
+  const rate = isMaharashtra ? 150 : 250;
+
+  // Calculate cart weight
+  const cartKg = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+
+  // Include Quick-View selected product
+  const selectedKg = selectedProduct ? (selectedProduct.packKg || 0) : 0;
+
+  const totalKg = cartKg + selectedKg;
+
+  if (totalKg <= 0) {
+    setDeliveryCharge(null);
+    return;
+  }
+
+  setDeliveryCharge(Math.round(rate * totalKg));
+};
+
 
   // Old simpler message kept for floating whatsapp link
   const getCartMessage = () => {
@@ -255,9 +261,9 @@ export default function App() {
 
   // re-run delivery whenever name / address / pincode changes
   useEffect(() => {
-    checkDelivery(pincode, customerName, customerAddress);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pincode, customerName, customerAddress]);
+  checkDelivery(pincode);
+}, [pincode]);
+
 // ===== CREATE ORDER FOR COD =====
 // ===== CREATE ORDER FOR COD (supports cart OR quick-view selectedProduct) =====
 const createCODOrder = async () => {
