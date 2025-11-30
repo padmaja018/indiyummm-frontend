@@ -159,7 +159,7 @@ export default function App() {
     const mhStarts = ["40", "41", "42", "43", "44"];
     const isMaharashtra = mhStarts.includes(first2);
 
-    setDeliveryCharge(isMaharashtra ? 70 : 160);
+    setDeliveryCharge(isMaharashtra ? 150 : 250);
   };
 
   // Old simpler message kept for floating whatsapp link
