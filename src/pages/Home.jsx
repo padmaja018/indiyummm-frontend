@@ -9,7 +9,7 @@ import "../App.css";
 import { Link } from "react-router-dom";
 
 // Backend URL for Razorpay B2 endpoints (create-order / verify-payment)
-const BACKEND_URL = "https://indiyummm-backend.onrender.com";
+const BACKEND_URL = "http://localhost:5000";
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -19,6 +19,7 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [reviews, setReviews] = useState({}); // { productName: [reviews] }
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [customerPhone, setCustomerPhone] = useState("");
   const [paymentSummaryOpen, setPaymentSummaryOpen] = useState(false);
 
   // DELIVERY state: null = unknown / pincode required; 0 = free; number = rupees
@@ -28,7 +29,6 @@ export default function App() {
   const [deliveryCharge, setDeliveryCharge] = useState(null);
 
   // UPI & payment modal
-  const UPI_ID = "aghogare1@okaxis";
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderPaid, setOrderPaid] = useState(false);
@@ -178,52 +178,6 @@ export default function App() {
   };
 
   // Build WhatsApp message for the order (root-level so openRazorpay can use it)
-  const buildWhatsAppMessage = (method, paymentId) => {
-    let msg = "🛍️ *Indiyummm Order Details*\n\n";
-    let runningSubtotal = 0;
-    if (cart && cart.length > 0) {
-      cart.forEach((item, idx) => {
-        msg += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-        msg += `Qty: ${item.qty} kg\n`;
-        msg += `Price: ₹${item.calculatedPrice}\n\n`;
-        runningSubtotal += item.calculatedPrice;
-      });
-    } else if (selectedProduct) {
-      const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-      msg += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
-      msg += `Qty: ${selectedProduct.packKg} kg\n`;
-      msg += `Price: ₹${priceSingle}\n\n`;
-      runningSubtotal = priceSingle;
-    }
-
-    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-    const totalPayable = runningSubtotal + delivery;
-
-    msg += "--------------------\n";
-    msg += `Subtotal: ₹${runningSubtotal}\n`;
-    msg += `Delivery Charges: ₹${delivery}\n`;
-    msg += `*Total Payable: ₹${totalPayable}*\n`;
-    msg += "--------------------\n\n";
-
-    msg += `Name: ${customerName}\n`;
-    msg += `Address: ${customerAddress}\n`;
-    msg += `Pincode: ${pincode}\n\n`;
-
-    if (method === "razorpay") {
-      msg += "Payment: Paid via Razorpay\n\n";
-      if (paymentId) msg += `Razorpay ID: ${paymentId}\n\n`;
-    } else if (method === "cod") {
-      msg += "Payment: Cash on Delivery Requested\n\n";
-    } else {
-      msg += "Payment: Paid via UPI Scan\n\n";
-    }
-
-    msg += "📞 Contact: +91 9404955707\n";
-    msg += "📧 Email: indiyumm23@gmail.com\n";
-
-    return msg;
-  };
-
   // ===== WhatsApp auto-fill: full cart order =====
   const handleWhatsAppOrder = () => {
     if (cart.length === 0) {
@@ -239,72 +193,16 @@ export default function App() {
 
     // If details are complete → open payment modal
     setOrderPlaced(true);
+    localStorage.setItem("indiyummm_customer_phone", customerPhone);
     setPaymentSummaryOpen(true);
   };
 
-  const confirmPaidAndSendWA = (method = "upi", razorpayId = "") => {
-    let runningSubtotal = 0;
-    let message = "🛍️ *Indiyummm Order Details*\n\n";
-
-    if (cart && cart.length > 0) {
-      cart.forEach((item, idx) => {
-        message += `${idx + 1}) *${item.name}* — ${item.packLabel}\n`;
-        message += `Qty: ${item.qty} kg\n`;
-        message += `Price: ₹${item.calculatedPrice}\n\n`;
-        runningSubtotal += item.calculatedPrice;
-      });
-    } else if (selectedProduct) {
-      const priceSingle = calcPriceForKg(selectedProduct.price, selectedProduct.packKg);
-      message += `*${selectedProduct.name}* — ${selectedProduct.packLabel}\n`;
-      message += `Qty: ${selectedProduct.packKg} kg\n`;
-      message += `Price: ₹${priceSingle}\n\n`;
-      runningSubtotal = priceSingle;
-    }
-
-    const delivery = (typeof deliveryCharge === "number") ? deliveryCharge : 0;
-    const totalPayable = runningSubtotal + delivery;
-
-    message += "--------------------\n";
-    message += `Subtotal: ₹${runningSubtotal}\n`;
-    message += `Delivery Charges: ₹${delivery}\n`;
-    message += `*Total Payable: ₹${totalPayable}*\n`;
-    message += "--------------------\n\n";
-
-    message += `Name: ${customerName}\n`;
-    message += `Address: ${customerAddress}\n`;
-    message += `Pincode: ${pincode}\n\n`;
-
-    if (method === "razorpay") {
-      message += "Payment: Paid via Razorpay\n\n";
-      if (razorpayId) message += `Razorpay ID: ${razorpayId}\n\n`;
-    } else if (method === "cod") {
-      message += "Payment: Cash on Delivery Requested\n\n";
-    } else {
-      message += "Payment: Paid via UPI Scan\n\n";
-    }
-
-    message += "📞 Contact: +91 9404955707\n";
-    message += "📧 Email: indiyumm23@gmail.com\n";
-
-    try {
-      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappURL, "_blank");
-    } catch (e) {
-      console.error("Failed to open WhatsApp:", e);
-      alert("Unable to open WhatsApp. Please copy the message and send manually.");
-    }
-
-    // Close modal and clear cart after opening WhatsApp
-    setPaymentModalOpen(false);
-    setCart([]);
-    setOrderPlaced(false);
-  };
+ 
 
   // When user confirms "Mark as Paid" we still send WA order so seller has details
 
-
   // WhatsApp order for single product
-  const handleWhatsAppOrderSingle = (product) => {
+  const handlePlaceOrder = (product) => {
     if (!product) return;
 
     if (!customerName || !customerAddress || String(pincode).length !== 6) {
@@ -314,19 +212,11 @@ export default function App() {
 
     setSelectedProduct(product);
     setOrderPlaced(true);
+    localStorage.setItem("indiyummm_customer_phone", customerPhone);
     setPaymentSummaryOpen(true);
   };
 
   // copy UPI ID helper
-  const copyToClipboard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert("UPI ID copied to clipboard");
-    } catch (e) {
-      alert("Copy failed — please copy manually: " + text);
-    }
-  };
-
   const handleSmoothScroll = (e, id) => {
     e && e.preventDefault();
     document.querySelector(id).scrollIntoView({ behavior: "smooth" });
@@ -368,120 +258,204 @@ export default function App() {
     checkDelivery(pincode, customerName, customerAddress);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pincode, customerName, customerAddress]);
+// ===== CREATE ORDER FOR COD =====
+// ===== CREATE ORDER FOR COD (supports cart OR quick-view selectedProduct) =====
+const createCODOrder = async () => {
+  try {
+    const receipt = "cod_" + Date.now();
+
+    // Save phone in browser for My Orders page
+    if (customerPhone) {
+      localStorage.setItem("indiyummm_customer_phone", String(customerPhone).trim());
+    }
+
+    // Build payload that supports both cart and selectedProduct (quick view)
+    const payload = {
+      amount: modalAmount,
+      receipt,
+      cart: cart || [],
+      selectedProduct: selectedProduct || null,
+      customer: {
+        name: customerName,
+        address: customerAddress,
+        pincode: pincode,
+        phone: customerPhone,
+        email: localStorage.getItem("customer_email") || "" 
+      },
+      cod: true
+    };
+
+    const res = await fetch(`${BACKEND_URL}/create-order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    console.log('COD order saved:', data);
+if(data&&(data.order_id||data.receipt)){
+ const oid=data.order_id||data.receipt; window.location.href=`/payment-success?orderId=${encodeURIComponent(oid)}&amount=${encodeURIComponent(modalAmount)}`; }
+return data;
+  } catch (err) {
+    console.error("COD order create failed", err);
+    alert("Failed to save COD order. Please try again.");
+  }
+};
 
   // ===== SECURE RAZORPAY FLOW =====
   // This function creates an order on the backend then opens Razorpay with that order_id.
   // After successful payment it calls /verify-payment and redirects to /payment-success on success.
-  const openRazorpay = async () => {
-    try {
-      const receipt = "indiyummm_" + Date.now();
-      const payload = {
-        amount: modalAmount, // in rupees
-        receipt,
-        cart,
-        customer: { name: customerName, address: customerAddress, pincode }
-      };
+  const openRazorpay = async ()=>{
+  try{
+    const receipt = `rcpt_${Date.now()}`;
+    const payload={amount:modalAmount,receipt,cart,selectedProduct,customer:{name:customerName,address:customerAddress,pincode,phone:customerPhone,email:localStorage.getItem('customer_email')||''}};
 
-      const createRes = await fetch(`${BACKEND_URL}/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const createData = await createRes.json();
-      if (!createData || !createData.order_id) {
-        alert("Unable to create order on server. Please try again.");
-        console.error("create-order failed", createData);
-        return;
-      }
+// EMAIL CONFIRMATION FUNCTION
+const sendEmailConfirmation = (orderData, method) => {
+  try {
+    const itemsText = (orderData.cart || [])
+      .map(item => `${item.name} (${item.packLabel}) — ${item.qty} kg = ₹${item.calculatedPrice}`)
+      .join("\n");
 
-      const options = {
-        key: createData.key_id || createData.keyId || createData.key || "",
-        amount: createData.amount, // in paise
-        currency: createData.currency || "INR",
-        name: "Indiyummm",
-        description: "Order Payment",
-        order_id: createData.order_id,
-        handler: async function (resp) {
-          try {
-            const verifyRes = await fetch(`${BACKEND_URL}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: resp.razorpay_order_id,
-                razorpay_payment_id: resp.razorpay_payment_id,
-                razorpay_signature: resp.razorpay_signature,
-                receipt
-              })
-            });
-            const v = await verifyRes.json();
-            if (v && v.verified) {
-              // Build WA message and redirect to success page
-              const waMsg = buildWhatsAppMessage("razorpay", resp.razorpay_payment_id);
-              // redirect
-              if (typeof window !== "undefined" && window.location) {
-                window.location.href = `/payment-success?orderId=${encodeURIComponent(resp.razorpay_order_id)}&amount=${encodeURIComponent(modalAmount)}&waMessage=${encodeURIComponent(waMsg)}`;
-              }
-            } else {
-              alert("Payment verification failed on server. Please contact support.");
-              console.error("verification failed", v);
-            }
-          } catch (err) {
-            console.error("verify-payment error", err);
-            alert("Server verification failed. Please contact support.");
-          }
-        },
-        modal: {
-          ondismiss: function() {
-            console.log("Razorpay modal dismissed");
-          }
-        }
-      };
+    const templateParams = {
+      customer_name: orderData.customer.name,
+      customer_email: orderData.customer.email,
+      customer_phone: orderData.customer.phone,
+      customer_address: orderData.customer.address,
+      order_id: orderData.order_id || orderData.receipt,
+      payment_method: method.toUpperCase(),
+      amount: orderData.amount,
+      order_items: itemsText,
+    };
 
-      if (typeof window !== "undefined" && window.Razorpay) {
-        new window.Razorpay(options).open();
-      } else {
-        alert("Razorpay checkout not available. Please use UPI QR or COD.");
-        console.warn("Razorpay script missing; options:", options);
-      }
-    } catch (err) {
-      console.error("openRazorpay error:", err);
-      alert("Failed to start payment. Please try again.");
-    }
-  };
+    console.log("EMAILJS sending payload:", templateParams);
 
-  return (
-    <div className="app">
-      {/* Navbar */}
-      <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
-        <h1 className="logo">Indiyummm</h1>
-        <nav className="desktop-nav">
-          <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
-          <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
-          <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
-          <Link to="/about">About</Link>
-        </nav>
+    emailjs.send(
+      "service_rlnqibi",
+      "template_litj5q6",
+      templateParams,
+      "NLQBCmpCL42kxAEFQ"
+    )
+    .then(() => console.log("Email sent"))
+    .catch(err => console.error("Email error:", err));
+  } catch (err) {
+    console.error("EmailJS Error:", err);
+  }
+};
 
-        <div className="nav-right">
-          <div className="cart-icon" onClick={() => setCartOpen(true)}>
-            <ShoppingCart className="icon" />
-            <span className="cart-count">{totalKg > 0 ? `${roundKg(totalKg)}kg` : null}</span>
-          </div>
-          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            <span className={mobileMenuOpen ? "line rotate1" : "line"}></span>
-            <span className={mobileMenuOpen ? "line hide" : "line"}></span>
-            <span className={mobileMenuOpen ? "line rotate2" : "line"}></span>
-          </button>
+
+    const cr=await fetch(`${BACKEND_URL}/create-order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const cd=await cr.json(); if(!cd||!cd.order_id){alert('Order create fail');return;}
+    const opts={key:cd.key_id||cd.keyId||cd.key||'',amount:cd.amount,currency:cd.currency||'INR',name:'Indiyummm',description:'Order Payment',order_id:cd.order_id,handler:async (resp)=>{
+      try{
+        const vr=await fetch(`${BACKEND_URL}/verify-payment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({razorpay_order_id:resp.razorpay_order_id,razorpay_payment_id:resp.razorpay_payment_id,razorpay_signature:resp.razorpay_signature,receipt})});
+        const v=await vr.json(); if(v&&v.verified){window.location.href=`/payment-success?orderId=${encodeURIComponent(resp.razorpay_order_id)}&amount=${encodeURIComponent(modalAmount)}`;} else alert('Verify failed');
+      }catch(e){console.error(e);alert('Verify err');}
+    },modal:{ondismiss:()=>{}}};
+    if(window.Razorpay) new window.Razorpay(opts).open(); else alert('Razorpay missing');
+  }catch(e){console.error(e);alert('RZP fail');}
+};
+
+      
+
+      // duplicate/out-of-place Razorpay block removed (leftover from earlier edits)
+
+/* ---------- Header (use login state from localStorage; keep mobile menu & cart) ---------- */
+const isCustomerLogged = typeof window !== "undefined" && !!localStorage.getItem("customer_token");
+const customerNameShort = typeof window !== "undefined" ? (localStorage.getItem("customer_name") || "") : "";
+
+return (
+  <div className="app">
+    {/* Navbar - keep styling & scroll behaviour, but let App.jsx be authoritative for global links.
+        This header will render shop anchors + cart + mobile menu button.
+        Login/Signup/Logout respects localStorage so both Home.jsx and App.jsx show same state. */}
+    <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
+      <h1 className="logo">Indiyummm</h1>
+
+      <nav className="desktop-nav">
+        <a href="#home" onClick={(e) => handleSmoothScroll(e, "#home")}>Home</a>
+        <a href="#chutneys" onClick={(e) => handleSmoothScroll(e, "#chutneys")}>Dry Chutneys</a>
+        <a href="#pickles" onClick={(e) => handleSmoothScroll(e, "#pickles")}>Pickles</a>
+        <Link to="/about">About</Link>
+
+        {/* Show My Orders always (App.jsx also shows it) */}
+        <Link to="/my-orders">My Orders</Link>
+
+        {/* Show login / signup only when not logged in; otherwise show greeting + logout link */}
+        {isCustomerLogged ? (
+          <>
+            <span style={{ color: "#4A7C59", marginLeft: 10 }}>{`Hi, ${customerNameShort || "Customer"}`}</span>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.removeItem("customer_token");
+                localStorage.removeItem("customer_name");
+                localStorage.removeItem("customer_email");
+                // refresh to let App.jsx re-evaluate navbar
+                window.location.reload();
+              }}
+              style={{ marginLeft: 10 }}
+            >
+              Logout
+            </a>
+          </>
+        ) : (
+          <>
+            <Link to="/customer/login" style={{ marginLeft: 10 }}>Login</Link>
+            <Link to="/customer/signup">Sign up</Link>
+          </>
+        )}
+      </nav>
+
+      <div className="nav-right">
+        <div className="cart-icon" onClick={() => setCartOpen(true)} role="button" aria-label="Open cart">
+          <ShoppingCart className="icon" />
+          <span className="cart-count">{totalKg > 0 ? `${roundKg(totalKg)}kg` : null}</span>
         </div>
-      </header>
 
-{mobileMenuOpen && (
-  <div className="mobile-nav">
-    <a href="#home" onClick={(e)=>handleSmoothScroll(e,'#home')}>Home</a>
-    <a href="#chutneys" onClick={(e)=>handleSmoothScroll(e,'#chutneys')}>Dry Chutneys</a>
-    <a href="#pickles" onClick={(e)=>handleSmoothScroll(e,'#pickles')}>Pickles</a>
-    <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
-  </div>
-)}
+        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          <span className={mobileMenuOpen ? "line rotate1" : "line"}></span>
+          <span className={mobileMenuOpen ? "line hide" : "line"}></span>
+          <span className={mobileMenuOpen ? "line rotate2" : "line"}></span>
+        </button>
+      </div>
+    </header>
+
+    {/* Mobile nav (keeps same links but also respects login state) */}
+    {mobileMenuOpen && (
+      <div className="mobile-nav">
+        <a href="#home" onClick={(e) => handleSmoothScroll(e, "#home")}>Home</a>
+        <a href="#chutneys" onClick={(e) => handleSmoothScroll(e, "#chutneys")}>Dry Chutneys</a>
+        <a href="#pickles" onClick={(e) => handleSmoothScroll(e, "#pickles")}>Pickles</a>
+        <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
+        <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)}>My Orders</Link>
+
+        {isCustomerLogged ? (
+          <>
+            <div style={{ padding: "8px 0", fontWeight: 600, color: "#4A7C59" }}>Hi, {customerNameShort || "Customer"}</div>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                localStorage.removeItem("customer_token");
+                localStorage.removeItem("customer_name");
+                localStorage.removeItem("customer_email");
+                setMobileMenuOpen(false);
+                window.location.reload();
+              }}
+            >
+              Logout
+            </a>
+          </>
+        ) : (
+          <>
+            <Link to="/customer/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+            <Link to="/customer/signup" onClick={() => setMobileMenuOpen(false)}>Sign up</Link>
+          </>
+        )}
+      </div>
+    )}
 
       {/* Hero Section */}
       <section id="home" className="hero">
@@ -537,7 +511,7 @@ export default function App() {
               <div className="modal-buttons">
                 <button className="btn-add" onClick={() => { addToCart(selectedProduct, selectedProduct.packKg, selectedProduct.packLabel); setSelectedProduct(null); }}>Add to Cart</button>
 
-                <button className="btn-whatsapp" onClick={() => handleWhatsAppOrderSingle(selectedProduct)}>Place Order</button>
+                <button className="btn-whatsapp" onClick={() => handlePlaceOrder(selectedProduct)}>Place Order</button>
               </div>
             </motion.div>
           </motion.div>
@@ -613,6 +587,13 @@ export default function App() {
           onChange={(e) => setCustomerAddress(e.target.value)}
         />
         <input
+        type="text"
+        placeholder="Phone Number"
+        value={customerPhone}
+        onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, "").slice(0,10))}
+        />
+
+        <input
           type="text"
           maxLength={6}
           placeholder="Pincode"
@@ -633,7 +614,8 @@ export default function App() {
             }
             setDetailsModalOpen(false);
             setOrderPlaced(true);
-            setPaymentSummaryOpen(true);
+            localStorage.setItem("indiyummm_customer_phone", customerPhone);
+             setPaymentSummaryOpen(true);
           }}
         >
           Continue to Payment
@@ -642,7 +624,6 @@ export default function App() {
     </motion.div>
   )}
 </AnimatePresence>
-
 
       
       {/* Payment Summary Modal */}
@@ -706,7 +687,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-
       {/* Payment Modal (UPI) - opens after Place Order */}
       <AnimatePresence>
         {paymentModalOpen && (
@@ -718,25 +698,10 @@ export default function App() {
               
 <div className="payment-body">
 
-  {/* QR SCAN & PAY */}
-  <div className="qr-block" style={{ textAlign: "center" }}>
-    <p style={{ marginBottom: 6, fontWeight: "bold" }}>Or Scan & Pay using UPI</p>
-    <img 
-      src={`https://api.qrserver.com/v1/create-qr-code/?size=230x230&data=upi://pay?pa=${UPI_ID}&pn=Indiyummm&am=${modalAmount}&cu=INR`} 
-      alt="Dynamic QR" 
-      style={{ width: 230, height: 230, borderRadius: 10 }}
-    />
-  </div>
-
   {/* PAYMENT DETAILS */}
   <div className="payment-details">
-    <p><strong>UPI ID:</strong> {UPI_ID} 
-      <button className="copy-btn" onClick={() => copyToClipboard(UPI_ID)}>Copy</button>
-    </p>
-
     <p><strong>Amount:</strong> ₹{modalAmount}</p>
 
-    {/* RAZORPAY BUTTON - now calls openRazorpay (secure flow) */}
     <button
       className="btn-pay-now"
       style={{ backgroundColor: "#0F9D58", color: "#fff" }}
@@ -745,38 +710,25 @@ export default function App() {
       Pay Securely (Razorpay)
     </button>
 
-    {/* COD */}
-  <button 
-  className="btn-pay-now" 
-  style={{ backgroundColor: "#444", color: "#fff" }}
-  onClick={() => confirmPaidAndSendWA("cod")}
->
-  Cash on Delivery (COD)
-</button>
-
-    {/* MARK AS PAID */}
-    <button
-      className="btn-mark-paid"
-      style={{ backgroundColor: "#0A66C2", color: "#fff" }}
-      onClick={() => confirmPaidAndSendWA("upi")}
+    <button 
+      className="btn-pay-now" 
+      style={{ backgroundColor: "#444", color: "#fff" }}
+      onClick={async () => {
+        const data = await createCODOrder();
+        if (data && data.order_id) {
+          window.location.href = `/payment-success?orderId=${data.order_id}&amount=${modalAmount}&method=cod`;
+        }
+      }}
     >
-      Mark as Paid
+      Cash on Delivery (COD)
     </button>
 
-    {/* GO BACK */}
     <button className="btn-back" onClick={() => setPaymentModalOpen(false)}>
       Go Back
     </button>
-
-    <p className="small-muted" style={{ marginTop: 12 }}>
-      After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
-    </p>
   </div>
 
-                  <p className="small-muted" style={{ marginTop: 12 }}>
-                    After payment, tap <strong>Mark as Paid</strong> so we get your order immediately.
-                  </p>
-                </div>
+                  </div>
               
             </motion.div>
           </motion.div>

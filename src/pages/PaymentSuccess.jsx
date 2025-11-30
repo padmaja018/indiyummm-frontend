@@ -8,45 +8,39 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
 
   const query = new URLSearchParams(location.search);
-  const orderId = query.get("orderId");
-  const amount = query.get("amount");
-  const message = query.get("waMessage");
+  const orderId = query.get("orderId") || "N/A";
+  const amount = query.get("amount") || "N/A";
+  const method = query.get("method") || "paid"; // default to paid
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleWA = () => {
-    if (!message) {
-      alert("WhatsApp message missing.");
-      return;
-    }
-    window.open(
-      `https://wa.me/919518501138?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-  };
-
   return (
     <div className="success-wrapper">
-      <Confetti numberOfPieces={300} recycle={false} />
+      <Confetti numberOfPieces={150} recycle={false} />
 
       <div className="success-card">
         <div className="success-icon">✔</div>
 
-        <h1>Payment Successful 🎉</h1>
+        {method === "cod" ? (
+          <>
+            <h1>Order Placed Successfully 🎉</h1>
+            <p className="success-amount">
+              Your COD order has been placed.  
+              You will pay <strong>₹{amount}</strong> on delivery.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1>Payment Successful 🎉</h1>
+            <p className="success-amount">
+              Your payment of <strong>₹{amount}</strong> has been received.
+            </p>
+          </>
+        )}
 
-        <p className="success-amount">
-          Your payment of <strong>₹{amount}</strong> has been received.
-        </p>
-
-        <p className="success-orderId">
-          <strong>Order ID:</strong> {orderId}
-        </p>
-
-        <button className="wa-button" onClick={handleWA}>
-          Send Order on WhatsApp
-        </button>
+        <p className="success-orderId"><strong>Order ID:</strong> {orderId}</p>
 
         <button className="continue-btn" onClick={() => navigate("/")}>
           Continue Shopping
