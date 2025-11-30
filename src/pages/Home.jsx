@@ -39,7 +39,7 @@ export default function App() {
 
   // ---------------- products ----------------
   const chutneys = [
-    { name: "Coconut Chutney", price: 690, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
+    { name: "Coconut Chutney", price: 20, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
     { name: "Garlic Chutney", price: 680, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
     { name: "Shegdana Chutney", price: 680, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
     { name: "Javas Chutney", price: 680, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
