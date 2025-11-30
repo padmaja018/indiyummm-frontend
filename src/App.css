@@ -189,7 +189,7 @@ body {
 .hero-btn {
   margin-top: 2rem;
   background-color: #e65c00;
-  color: #fff8e7;
+  color: #c29836;
   border: none;
   padding: 0.9rem 2rem;
   border-radius: 50px;
@@ -199,7 +199,7 @@ body {
 }
 
 .hero-btn:hover {
-  background-color: #ff7f50;
+  background-color: #f3ebe8;
   transform: scale(1.05);
 }
 
@@ -1342,4 +1342,16 @@ textarea { resize: vertical; min-height: 60px; }
   text-align: left !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+.admin-btn {
+  background: #4A7C59;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-btn:hover {
+  background: #3a6047;
 }
