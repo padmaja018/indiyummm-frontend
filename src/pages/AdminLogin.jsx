@@ -10,7 +10,7 @@ export default function AdminLogin() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const ADMIN_EMAIL = "admin@indiyummm.com";
+    const ADMIN_EMAIL = "indiyumm23@gmail.com";
     const ADMIN_PASS = "Indi@1234";
 
     if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
