@@ -1,7 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./About.css";
+import { Link, useNavigate } from "react-router-dom";
+
 
 export default function About() {
+
+  // ⭐ Navbar State + Login State (MUST be here)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("customer_token");
+  const customerName = localStorage.getItem("customer_name");
+
+  const logout = () => {
+    localStorage.removeItem("customer_token");
+    localStorage.removeItem("customer_name");
+    localStorage.removeItem("customer_email");
+    navigate("/login");
+  };
+
+  // ⭐ Navbar Scroll Effect
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Auto fade transition every 6 seconds
   useEffect(() => {
@@ -23,6 +47,68 @@ export default function About() {
   }, []);
 
   return (
+        <>
+
+    {/* ⭐ NAVBAR */}
+      <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
+        <h1 className="logo">Indiyummm</h1>
+
+        {/* Desktop menu */}
+        <nav className="desktop-nav">
+          <Link to="/">Home</Link>
+          <a href="#chutneys">Dry Chutneys</a>
+          <a href="#pickles">Pickles</a>
+          <Link to="/about">About</Link>
+
+          {token ? (
+            <>
+              <Link to="/my-orders">My Orders</Link>
+              <span className="username">Hi, {customerName}</span>
+              <span className="logout-btn" onClick={logout}>Logout</span>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/signup">Signup</Link>
+            </>
+          )}
+        </nav>
+
+        {/* Mobile hamburger */}
+        <div className="mobile-icons">
+          <button
+            className="menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            ☰
+          </button>
+        </div>
+      </header>
+
+      {/* ⭐ MOBILE MENU */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav">
+          <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+          <a href="#chutneys" onClick={() => setMobileMenuOpen(false)}>Dry Chutneys</a>
+          <a href="#pickles" onClick={() => setMobileMenuOpen(false)}>Pickles</a>
+          <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
+
+          {token ? (
+            <>
+              <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)}>My Orders</Link>
+              <span className="username">Hi, {customerName}</span>
+              <span className="logout-btn" onClick={logout}>Logout</span>
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Signup</Link>
+            </>
+          )}
+        </div>
+      )}
+            {/* ⭐ YOUR ORIGINAL ABOUT SECTION (UNTOUCHED) */}
+
     <div className="about-container">
 
       {/* 🌿 Hero Banner */}
@@ -163,5 +249,7 @@ export default function About() {
       </section>
 
     </div>
+    </>
+
   );
 }
