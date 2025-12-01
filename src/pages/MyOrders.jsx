@@ -1,9 +1,35 @@
 import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 
 
 export default function MyOrders() {
 
   const BACKEND = "https://indiyummm-backend.onrender.com";
+
+    // ⭐ Navbar states
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+
+  // ⭐ Authentication state
+  const token = localStorage.getItem("customer_token");
+  const customerName = localStorage.getItem("customer_name");
+
+  const logout = () => {
+    localStorage.removeItem("customer_token");
+    localStorage.removeItem("customer_name");
+    localStorage.removeItem("customer_email");
+    navigate("/login");
+  };
+
+  // ⭐ Navbar scroll effect
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   const [phone, setPhone] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -40,6 +66,60 @@ export default function MyOrders() {
     );
 
   return (
+    <>
+    {/* ⭐ NAVBAR (same as Home.jsx) */}
+    <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
+      <h1 className="logo">Indiyummm</h1>
+
+      <nav className="desktop-nav">
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+
+        {token ? (
+          <>
+            <Link to="/my-orders">My Orders</Link>
+            <span className="username">Hi, {customerName}</span>
+            <span className="logout-btn" onClick={logout}>Logout</span>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
+          </>
+        )}
+      </nav>
+
+      <div className="mobile-icons">
+        <button
+          className="menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          ☰
+        </button>
+      </div>
+    </header>
+
+    {/* ⭐ MOBILE MENU */}
+    {mobileMenuOpen && (
+      <div className="mobile-nav">
+        <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+        <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
+
+        {token ? (
+          <>
+            <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)}>My Orders</Link>
+            <span className="username">Hi, {customerName}</span>
+            <span className="logout-btn" onClick={logout}>Logout</span>
+          </>
+        ) : (
+          <>
+            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+            <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Signup</Link>
+          </>
+        )}
+      </div>
+    )}
+
     <div style={styles.page}>
       <h2 style={styles.heading}>My Orders</h2>
 
@@ -124,6 +204,7 @@ export default function MyOrders() {
         ))
       )}
     </div>
+    </>
   );
 }
 
