@@ -40,7 +40,7 @@ export default function App() {
   // ---------------- products ----------------
   const chutneys = [
     { name: "Coconut Chutney", price: 800, img: "/coconut-chutney.jpg", desc: "A traditional blend of coconut and spices, handcrafted for a rich, earthy taste.", tag: "bestseller" },
-    { name: "Garlic Chutney", price: 30, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
+    { name: "Garlic Chutney", price: 700, img: "/garlic-chutney.jpg", desc: "Fiery and aromatic dry garlic chutney made with 100% natural ingredients.", tag: "new" },
     { name: "Shegdana Chutney", price: 700, img: "/shegdana-chutney.jpg", desc: "Nutty and flavorful, made from roasted peanuts and mild spices." },
     { name: "Javas Chutney", price: 700, img:"/javas-chutney.jpg", desc: "Wholesome flaxseed chutney, rich in omega-3 and traditional taste", tag: "bestseller"},
     { name: "Karala Chutney", price: 700, img:"/Karala-chutney.jpg", desc: "Bitter gourd (karala) blended with traditional spices for a unique and healthy taste" },
@@ -384,7 +384,7 @@ return (
         <a href="#pickles" onClick={(e) => handleSmoothScroll(e, "#pickles")}>Pickles</a>
         <Link to="/about">About</Link>
         <Link to="/my-orders">My Orders</Link>
-        
+
 
 
         {/* Show login / signup only when not logged in; otherwise show greeting + logout link */}
