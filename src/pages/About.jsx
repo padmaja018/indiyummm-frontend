@@ -89,8 +89,6 @@ export default function About() {
       {mobileMenuOpen && (
         <div className="mobile-nav">
           <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <a href="#chutneys" onClick={() => setMobileMenuOpen(false)}>Dry Chutneys</a>
-          <a href="#pickles" onClick={() => setMobileMenuOpen(false)}>Pickles</a>
           <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About</Link>
 
           {token ? (
