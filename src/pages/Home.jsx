@@ -826,14 +826,14 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
                 </button>
               </div>
 
-              {/* Reviews */}
+             {/* Reviews */}
               <div className="reviews">
-                <h5>Reviews:</h5>
+                {/* <h5>Reviews:</h5> */}
                 {(reviews[product.name] || []).map((r, idx) => (
                   <p key={idx}><strong>{r.name}</strong> ({r.rating}/5): {r.text}</p>
                 ))}
 
-                {/* Review Form */}
+                {/* Review Form
                 <form className="review-form" onSubmit={(e) => { e.preventDefault(); submitReview(product.name); }}>
                   <input type="text" placeholder="Your Name" value={form.name} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, name: e.target.value } }))} required />
                   <select value={form.rating} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, rating: parseInt(e.target.value) } }))}>
@@ -841,7 +841,7 @@ function ProductSection({ id, title, products, onOrder, addToCart, color, review
                   </select>
                   <textarea placeholder="Your Review" value={form.text} onChange={(e) => setReviewForm(prev => ({ ...prev, [product.name]: { ...form, text: e.target.value } }))} required />
                   <button type="submit">Submit Review</button>
-                </form>
+                </form> */}
               </div>
             </motion.div>
           );
